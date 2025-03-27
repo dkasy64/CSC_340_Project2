@@ -1,5 +1,3 @@
-
-
 public class ClientWindowTest
 {
 	public static void main(String[] args)
