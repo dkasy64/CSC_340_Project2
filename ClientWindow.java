@@ -1,5 +1,3 @@
-package project2;
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,8 +6,7 @@ import java.util.TimerTask;
 import java.util.Timer;
 import javax.swing.*;
 
-public class ClientWindow implements ActionListener
-{
+public class ClientWindow implements ActionListener {
 	private JButton poll;
 	private JButton submit;
 	private JRadioButton options[];
@@ -25,8 +22,7 @@ public class ClientWindow implements ActionListener
 	
 	// write setters and getters as you need
 	
-	public ClientWindow()
-	{
+	public ClientWindow(){
 		JOptionPane.showMessageDialog(window, "This is a trivia game");
 		
 		window = new JFrame("Trivia");
@@ -36,8 +32,7 @@ public class ClientWindow implements ActionListener
 		
 		options = new JRadioButton[4];
 		optionGroup = new ButtonGroup();
-		for(int index=0; index<options.length; index++)
-		{
+		for(int index=0; index<options.length; index++){
 			options[index] = new JRadioButton("Option " + (index+1));  // represents an option
 			// if a radio button is clicked, the event would be thrown to this class to handle
 			options[index].addActionListener(this);
@@ -80,14 +75,12 @@ public class ClientWindow implements ActionListener
 	// this method is called when you check/uncheck any radio button
 	// this method is called when you press either of the buttons- submit/poll
 	@Override
-	public void actionPerformed(ActionEvent e)
-	{
+	public void actionPerformed(ActionEvent e){
 		System.out.println("You clicked " + e.getActionCommand());
 		
 		// input refers to the radio button you selected or button you clicked
 		String input = e.getActionCommand();  
-		switch(input)
-		{
+		switch(input){
 			case "Option 1":	// Your code here
 								break;
 			case "Option 2":	// Your code here
@@ -106,13 +99,11 @@ public class ClientWindow implements ActionListener
 		
 		// test code below to demo enable/disable components
 		// DELETE THE CODE BELOW FROM HERE***
-		if(poll.isEnabled())
-		{
+		if(poll.isEnabled()){
 			poll.setEnabled(false);
 			submit.setEnabled(true);
 		}
-		else
-		{
+		else {
 			poll.setEnabled(true);
 			submit.setEnabled(false);
 		}
@@ -127,18 +118,14 @@ public class ClientWindow implements ActionListener
 	}
 	
 	// this class is responsible for running the timer on the window
-	public class TimerCode extends TimerTask
-	{
+	public class TimerCode extends TimerTask {
 		private int duration;  // write setters and getters as you need
-		public TimerCode(int duration)
-		{
+		public TimerCode(int duration) {
 			this.duration = duration;
 		}
 		@Override
-		public void run()
-		{
-			if(duration < 0)
-			{
+		public void run(){
+			if(duration < 0) {
 				timer.setText("Timer expired");
 				window.repaint();
 				this.cancel();  // cancel the timed task
