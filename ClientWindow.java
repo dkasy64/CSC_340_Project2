@@ -1,6 +1,9 @@
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.security.SecureRandom;
 import java.util.TimerTask;
 import java.util.Timer;
@@ -19,10 +22,16 @@ public class ClientWindow implements ActionListener {
 	private JFrame window;
 	
 	private static SecureRandom random = new SecureRandom();
+
+	private PrintWriter out;
+	private BufferedReader in;
 	
 	// write setters and getters as you need
 	
-	public ClientWindow(){
+	public ClientWindow(PrintWriter out, BufferedReader in){
+		this.out = out;
+		this.in = in;
+
 		JOptionPane.showMessageDialog(window, "This is a trivia game");
 		
 		window = new JFrame("Trivia");
@@ -48,7 +57,6 @@ public class ClientWindow implements ActionListener {
 		t.schedule(clock, 0, 1000); // clock is called every second
 		window.add(timer);
 		
-		
 		score = new JLabel("SCORE"); // represents the score
 		score.setBounds(50, 250, 100, 20);
 		window.add(score);
@@ -61,6 +69,9 @@ public class ClientWindow implements ActionListener {
 		submit = new JButton("Submit");  // button to submit their answer
 		submit.setBounds(200, 300, 100, 20);
 		submit.addActionListener(this);  // calls actionPerformed of this class
+		// //////////////
+		// submit.setEnabled(false);  // initially disabled
+		// ///////////
 		window.add(submit);
 		
 		
