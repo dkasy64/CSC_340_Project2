@@ -130,6 +130,11 @@ public class ClientWindow implements ActionListener {
                 JOptionPane.showMessageDialog(window, "Disconnected from server");
                 window.dispose();
                 return;
+            }else if (message.equals("NEXT")) {
+                // Handle next question notification
+                JOptionPane.showMessageDialog(window, "Moving to next question...");
+                stopTimer();
+                poll.setEnabled(true); // Re-enable the poll button for the next question
             }
     
             // Handle different message types
@@ -302,7 +307,7 @@ public class ClientWindow implements ActionListener {
                         JOptionPane.showMessageDialog(window, "Time's up! -20 points penalty.");
                     }
                     
-                    poll.setEnabled(false);
+                    poll.setEnabled(true); // Re-enable the poll button after timeout
                     submit.setEnabled(false);
                     for (JRadioButton option : options) {
                         option.setEnabled(false);
