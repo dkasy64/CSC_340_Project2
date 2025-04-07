@@ -29,7 +29,7 @@ public class Client {
     
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            String serverIP = "127.0.0.1"; // Default to localhost
+            String serverIP = "10.111.145.237"; // Default to localhost
             int serverPort = 9191; // Default port
             
             if (args.length == 2) {
