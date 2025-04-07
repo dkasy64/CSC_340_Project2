@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.SecureRandom;
 import java.util.TimerTask;
+import java.util.List;
 import java.util.Timer;
 import javax.swing.*;
 
@@ -25,12 +26,19 @@ public class ClientWindow implements ActionListener {
 
 	private PrintWriter out;
 	private BufferedReader in;
+	private List<String[]>questions;// List to store questions
+	private int currentQuestionIndex=0;// Current question index
+	private int currentScore=0;
 	
 	// write setters and getters as you need
 	
 	public ClientWindow(PrintWriter out, BufferedReader in){
 		this.out = out;
 		this.in = in;
+		loadQuestions();
+		initiaalizeGUI();
+		listenToServer();
+		showQuestions(currentQuestionIndex);
 
 		JOptionPane.showMessageDialog(window, "This is a trivia game");
 		
