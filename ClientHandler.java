@@ -20,6 +20,8 @@ public class ClientHandler {
 
             out.println("Welcome! You're Client " + clientID);
 
+           // if()
+
             String message;
             while ((message = in.readLine()) != null) {
                 System.out.println("Recieved from client " + clientID + ": " + message);
@@ -30,4 +32,17 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
+    // //@Override
+    // public void buzz() {
+    //     try {
+    //         out = new PrintWriter(clientSocket.getOutputStream(), true);
+    //         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+    //         out.println("Buzz from " + clientID);
+
+    //     } catch (IOException e) {
+    //         System.out.println("Client " + clientID + " disconnected");
+    //         e.printStackTrace();
+    //     }
+    // }
 }
