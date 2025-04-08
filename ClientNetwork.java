@@ -7,10 +7,13 @@ import java.net.SocketException;
 public class ClientNetwork {
     private DatagramSocket udpSocket;
     private String clientID;
+    private String serverIP;
     
-    public ClientNetwork(String clientID) throws SocketException {
+    public ClientNetwork(String clientID,String serverIP) throws SocketException {
         this.clientID = clientID;
         this.udpSocket = new DatagramSocket();
+        this.serverIP = serverIP;
+        System.out.println("Client network initialized with ID: " + clientID);
     }
     
     // Add method to update client ID when server assigns one
@@ -25,7 +28,7 @@ public class ClientNetwork {
         DatagramPacket packet = new DatagramPacket(
             buffer,
             buffer.length,
-            InetAddress.getByName("localhost"),
+            InetAddress.getByName(serverIP), // Server's IP address
             9192  // Match server's UDP port
         );
         System.out.println("Sending UDP buzz: " + message);
