@@ -1,4 +1,7 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -10,9 +13,6 @@ import java.net.SocketException;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
-import java.awt.Font;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 
 public class ClientWindow implements ActionListener {
     // GUI Components

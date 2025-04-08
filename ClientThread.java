@@ -60,6 +60,12 @@ public class ClientThread implements Runnable {
             out.println("WELCOME:" + clientId);
             System.out.println("Sent welcome message to " + clientId);
             
+            // Wait until the game starts
+        synchronized (activeClients) {
+            while (!TriviaServer.gameStarted) {
+                activeClients.wait();
+            }
+        }
             // Send first question
             sendNextQuestion();
             
@@ -78,7 +84,7 @@ public class ClientThread implements Runnable {
                     // This is unlikely to happen as buzz should come via UDP
                 }
             }
-        } catch (IOException e) {
+        } catch (InterruptedException|IOException e) {
             System.out.println(clientId + " disconnected unexpectedly: " + e.getMessage());
         } finally {
             try {

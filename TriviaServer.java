@@ -9,6 +9,7 @@ public class TriviaServer {
     private static Queue<String> udpQueue = new ConcurrentLinkedQueue<>();
     private static List<ClientThread> activeClients = Collections.synchronizedList(new ArrayList<>());
     private static List<String> questions;
+    public  static volatile boolean gameStarted = false;
     
     public static void main(String[] args) {
         try {
@@ -20,6 +21,21 @@ public class TriviaServer {
             UDPThread udpThread = new UDPThread(UDP_PORT, udpQueue, activeClients);
             new Thread(udpThread).start();
             System.out.println("UDP service started on port " + UDP_PORT);
+            
+             
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                try {
+                    System.out.println("Press ENTER to start the game...");
+                    System.in.read(); // ENTER bekler
+                    synchronized (activeClients) {
+                        gameStarted = true; // Oyunu başlat
+                        activeClients.notifyAll(); // Tüm bekleyen istemcileri uyandır
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
             
             // Start TCP server
             try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
