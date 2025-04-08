@@ -182,12 +182,13 @@ public class ClientThread implements Runnable {
             System.out.println(clientId + " answered incorrectly (-10 points)");
         }
         
-        printScores(); // Update scores after each answer
-        sendNextQuestion();
-    }
-    
-    public void notifyTimeout() {
-        // Notify all clients to move to next question
-        out.println("NEXT");
+        printScores(); 
+        // Update scores after each answer
+       // Tüm client'ları senkronize et ve sonraki soruya geç
+        synchronized (activeClients) {
+            for (ClientThread client : activeClients) {
+                client.sendNextQuestion();
+            }
+        }
     }
 }
