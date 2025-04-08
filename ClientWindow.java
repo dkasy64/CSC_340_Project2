@@ -11,6 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
@@ -155,27 +156,27 @@ public class ClientWindow implements ActionListener {
 
         // Timer
         timer = new JLabel("--");
-        timer.setFont(customFont.deriveFont(12f));
+        timer.setFont(customFont.deriveFont(16f));
         timer.setBounds(250, 250, 100, 20);
         window.add(timer);
 
         // Score
         score = new JLabel("SCORE: 0");
-        score.setFont(customFont.deriveFont(12f));
+        score.setFont(customFont.deriveFont(16f));
         score.setBounds(50, 250, 100, 20);
         window.add(score);
 
         // Buttons
         poll = new JButton("Poll (Buzz)");
         poll.setFont(customFont.deriveFont(12f));
-        poll.setBounds(10, 300, 120, 20);
+        poll.setBounds(10, 300, 120, 40);
         poll.addActionListener(this);
         poll.setEnabled(false);  // Disabled until first question arrives
         window.add(poll);
 
         submit = new JButton("Submit");
         submit.setFont(customFont.deriveFont(12f));
-        submit.setBounds(200, 300, 100, 20);
+        submit.setBounds(200, 300, 120, 40);
         submit.addActionListener(this);
         submit.setEnabled(false);  // Disabled initially
         window.add(submit);
@@ -232,8 +233,12 @@ public class ClientWindow implements ActionListener {
                 String[] parts = questionData.split("\\|");
                 
                 if (parts.length >= 6) {
-                    question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
-                    question.setFont(customFont.deriveFont(12f));
+
+                    // GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                    // ge.registerFont(customFont);
+
+                    //question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
+                    question.setText("<html><span style=\"font-family: 'x12y12pxMaruMinyaM'; font-size: 16px;\">" + parts[0] + ". " + parts[1] + "</span></html>");
                     for (int i = 0; i < options.length && i < 4; i++) {
                         options[i].setFont(customFont.deriveFont(12f));
                         options[i].setText(parts[i + 2]);
