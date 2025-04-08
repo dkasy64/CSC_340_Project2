@@ -234,8 +234,8 @@ public class ClientWindow implements ActionListener {
                 
                 if (parts.length >= 6) {
 
-                     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                     ge.registerFont(customFont);
+                    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                    ge.registerFont(customFont);
 
                     //question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
                     question.setText("<html><span style=\"font-family: 'x12y12pxMaruMinyaM'; font-size: 16px;\">" + parts[0] + ". " + parts[1] + "</span></html>");
