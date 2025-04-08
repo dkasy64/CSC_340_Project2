@@ -12,17 +12,19 @@ public class ClientThread implements Runnable {
     private List<String> questions;
     private PrintWriter out;
     private BufferedReader in;
-    private int currentQuestionIndex = 0;
+    private int currentQuestionIndex; // This will be set from the server's global index
     private static Map<String, Integer> clientScores = new HashMap<>();
     private String clientId;
     private boolean buzzedInFirst = false;
     private boolean gameOver = false;
 
-    public ClientThread(Socket socket, Queue<String> udpQueue, List<ClientThread> activeClients, List<String> questions) throws IOException {
+    public ClientThread(Socket socket, Queue<String> udpQueue, List<ClientThread> activeClients, 
+                      List<String> questions, int currentQuestionIndex) throws IOException {
         this.clientSocket = socket;
         this.udpQueue = udpQueue;
         this.activeClients = activeClients;
         this.questions = questions;
+        this.currentQuestionIndex = currentQuestionIndex; // Use the global question index
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         
@@ -60,8 +62,8 @@ public class ClientThread implements Runnable {
             out.println("WELCOME:" + clientId);
             System.out.println("Sent welcome message to " + clientId);
             
-            // Send first question
-            sendNextQuestion();
+            // Send current question (not necessarily the first question)
+            sendCurrentQuestion();
             
             // Main game loop
             String clientMessage;
@@ -69,7 +71,7 @@ public class ClientThread implements Runnable {
                 System.out.println("Received from " + clientId + ": " + clientMessage);
                 if(gameOver) {
                     break;
-                 }
+                }
                 // Process client messages
                 if (clientMessage.startsWith("ANSWER:")) {
                     handleAnswer(clientMessage);
@@ -93,14 +95,14 @@ public class ClientThread implements Runnable {
         }
     }
 
-    private void sendNextQuestion() {
+    // Modified to send the current question rather than next question
+    private void sendCurrentQuestion() {
         if(gameOver){
             return;
         }
         if (currentQuestionIndex < questions.size()) {
             out.println("QUESTION:" + questions.get(currentQuestionIndex));
             System.out.println("Sent question " + (currentQuestionIndex + 1) + " to " + clientId);
-            currentQuestionIndex++;
             // Reset buzz status for new question
             buzzedInFirst = false;
         } else {
@@ -131,10 +133,53 @@ public class ClientThread implements Runnable {
 
                 System.out.println("Game over. Winner: " + winnerID + " with score: " + winnerScore);
             }
+        }
+    }
+    
+    // Modified to advance all clients to the next question
+    private void sendNextQuestion() {
+        if(gameOver){
+            return;
+        }
+        
+        // Increment question index and update global index
+        currentQuestionIndex++;
+        TriviaServer.updateCurrentQuestionIndex(currentQuestionIndex);
+        
+        if (currentQuestionIndex < questions.size()) {
+            // Send the next question to this client
+            out.println("QUESTION:" + questions.get(currentQuestionIndex));
+            System.out.println("Sent question " + (currentQuestionIndex + 1) + " to " + clientId);
+            // Reset buzz status for new question
+            buzzedInFirst = false;
+        } else {
+            gameOver = true;
 
-            // out.println("GAME_OVER:Final score: " + clientScores.get(clientId));
-            // System.out.println(clientId + " completed all questions with score: " + 
-            //     clientScores.get(clientId));
+            String winnerID = null;
+            int winnerScore = Integer.MIN_VALUE;
+
+            synchronized (activeClients) {
+                for (ClientThread client : activeClients) {
+                    // Check if the client has a higher score
+                    if (clientScores.containsKey(client.getClientId())) {
+                        int clientScore = clientScores.get(client.getClientId());
+                        if (clientScore > winnerScore) {
+                            winnerScore = clientScore;
+                            winnerID = client.getClientId();
+                        }
+                    }
+                }
+
+                String gameOverMessage = "GAME_OVER:WINNER:" + winnerID + ":" + winnerScore;
+
+                synchronized (activeClients) {
+                    for (ClientThread client : activeClients) {
+                        client.getWriter().println(gameOverMessage);
+                    }
+                }
+
+                System.out.println("Game over. Winner: " + winnerID + " with score: " + winnerScore);
+            }
         }
     }
 
@@ -146,7 +191,7 @@ public class ClientThread implements Runnable {
     }
 
     private void handleAnswer(String message) {
-        if (currentQuestionIndex <= 0 || currentQuestionIndex > questions.size()) {
+        if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.size()) {
             out.println("ERROR:Invalid question index");
             return;
         }
@@ -158,14 +203,20 @@ public class ClientThread implements Runnable {
             clientScores.put(clientId, clientScores.get(clientId) - 20);
             out.println("WRONG:Your score is now " + clientScores.get(clientId));
             printScores();
-            sendNextQuestion();
+            
+            // Notify all clients to move to the next question
+            synchronized (activeClients) {
+                for (ClientThread client : activeClients) {
+                    client.sendNextQuestion();
+                }
+            }
             return;
         } else {
             answer = message.substring("ANSWER:".length());
         }
     
         // Get correct answer from the question
-        String[] questionParts = questions.get(currentQuestionIndex - 1).split("\\|");
+        String[] questionParts = questions.get(currentQuestionIndex).split("\\|");
         String correctAnswer = questionParts[6];  // The 7th part is the correct answer (index 6)
     
         System.out.println(clientId + " answered: " + answer);
@@ -181,21 +232,14 @@ public class ClientThread implements Runnable {
             out.println("WRONG:Your score is now " + clientScores.get(clientId));
             System.out.println(clientId + " answered incorrectly (-10 points)");
         }
-    
-        printScores(); // Update scores after each answer
-    
-        // Unfreeze all clients
+        
+        printScores(); 
+        
+        // Notify all clients to move to the next question
         synchronized (activeClients) {
             for (ClientThread client : activeClients) {
-                client.getWriter().println("UNFREEZE");
+                client.sendNextQuestion();
             }
         }
-    
-        sendNextQuestion();
-    }
-    
-    public void notifyTimeout() {
-        // Notify all clients to move to next question
-        out.println("NEXT");
     }
 }
