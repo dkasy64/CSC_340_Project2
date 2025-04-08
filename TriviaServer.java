@@ -9,6 +9,8 @@ public class TriviaServer {
     private static Queue<String> udpQueue = new ConcurrentLinkedQueue<>();
     private static List<ClientThread> activeClients = Collections.synchronizedList(new ArrayList<>());
     private static List<String> questions;
+    // Add a global current question index
+    private static int currentQuestionIndex = 0;
     
     public static void main(String[] args) {
         try {
@@ -29,8 +31,9 @@ public class TriviaServer {
                     Socket clientSocket = serverSocket.accept();
                     System.out.println("New client connected from " + clientSocket.getInetAddress());
                     
-                    // Create and start a new thread for this client
-                    ClientThread clientThread = new ClientThread(clientSocket, udpQueue, activeClients, questions);
+                    // Create and start a new thread for this client with the current question index
+                    ClientThread clientThread = new ClientThread(clientSocket, udpQueue, activeClients, 
+                                                              questions, currentQuestionIndex);
                     activeClients.add(clientThread);
                     new Thread(clientThread).start();
                 }
@@ -41,8 +44,15 @@ public class TriviaServer {
         }
     }
     
+    // Method to update the current question index
+    public static synchronized void updateCurrentQuestionIndex(int index) {
+        currentQuestionIndex = index;
+        System.out.println("Game progressed to question index: " + currentQuestionIndex);
+    }
+    
     // Load questions from questions.txt
     private static List<String> loadQuestions() throws IOException {
+        // Rest of the method remains the same
         List<String> questionList = new ArrayList<>();
         
         // Try to find the file in different locations
