@@ -131,11 +131,23 @@ public class ClientWindow implements ActionListener {
                 JOptionPane.showMessageDialog(window, "Disconnected from server");
                 window.dispose();
                 return;
-            }else if (message.equals("NEXT")) {
+            } else if (message.equals("NEXT")) {
                 // Handle next question notification
                 JOptionPane.showMessageDialog(window, "Moving to next question...");
                 stopTimer();
                 poll.setEnabled(true); // Re-enable the poll button for the next question
+            } else if (message.equals("FREEZE")) {
+                // Handle freeze logic
+                poll.setEnabled(false);
+                submit.setEnabled(false);
+                for (JRadioButton option : options) {
+                    option.setEnabled(false);
+                }
+                JOptionPane.showMessageDialog(window, "Waiting for another player to answer...");
+            } else if (message.equals("UNFREEZE")) {
+                // Handle unfreeze logic
+                poll.setEnabled(true);
+                JOptionPane.showMessageDialog(window, "You can now proceed to the next question.");
             }
     
             // Handle different message types
@@ -150,12 +162,11 @@ public class ClientWindow implements ActionListener {
                     window.setTitle("Trivia Game - " + this.clientID);
                     System.out.println("Server assigned ID: " + this.clientID);
                 }
-            }
-            else if (message.startsWith("QUESTION:")) {
+            } else if (message.startsWith("QUESTION:")) {
                 // Extract and display question with options
                 String questionData = message.substring("QUESTION:".length());
                 String[] parts = questionData.split("\\|");
-                
+    
                 if (parts.length >= 6) {
                     question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
                     for (int i = 0; i < options.length && i < 4; i++) {
@@ -169,8 +180,7 @@ public class ClientWindow implements ActionListener {
                     submit.setEnabled(false);
                     currentQuestionIndex++;
                 }
-            }
-            else if (message.startsWith("CORRECT:")) {
+            } else if (message.startsWith("CORRECT:")) {
                 // Handle correct answer
                 String[] parts = message.split(":");
                 if (parts.length > 1) {
@@ -182,8 +192,7 @@ public class ClientWindow implements ActionListener {
                 JOptionPane.showMessageDialog(window, "Correct! Your score is now " + currentScore);
                 optionGroup.clearSelection();
                 stopTimer();
-            }
-            else if (message.startsWith("WRONG:")) {
+            } else if (message.startsWith("WRONG:")) {
                 // Handle wrong answer
                 String[] parts = message.split(":");
                 if (parts.length > 1) {
@@ -195,44 +204,31 @@ public class ClientWindow implements ActionListener {
                 JOptionPane.showMessageDialog(window, "Wrong answer! Your score is now " + currentScore);
                 optionGroup.clearSelection();
                 stopTimer();
-            }
-            else if (message.startsWith("GAME_OVER")) {
+            } else if (message.startsWith("GAME_OVER")) {
                 String finalMessage = "Game Over!";
                 if (message.contains(":")) {
-					String[] parts = message.split(":");
-					if (parts.length >= 3 && parts[1].equals("WINNER")) {
-						String winnerID = parts[2];
-						String winnerScore = parts.length > 3 ? parts[3] : "0";
-						JPanel gameOverMessage = new JPanel();
-
-						if(winnerID.equals(clientID)) {
-							//finalMessage = "Winner winner, chicken dinner!\n You won the game with a score of " + winnerScore + "!";
-							//JLabel finalMessage = new JLabel("<html><center>Winner winner, chicken dinner!<br>You won the game with a score of \" + winnerScore + \"!</center></html>");
-							finalMessage = "<html><center>Winner winner, chicken dinner!<br>You won the game with a score of " + winnerScore + "!</center></html>";
-							//finalMessage.setFont(boldCustomFont.deriveFont(18f));
-						} else {
-							//finalMessage = "L is for Loser! \n You lost the game with a score of " + currentScore + "!\n The winner is " + winnerID + " with a score of " + winnerScore + "!";
-							finalMessage = "<html><center>L is for Loser!<br>You lost the game with a score of " + currentScore + "<br>The winner is " + winnerID + " with a score of " + winnerScore + "!</center></html>";
-
-						}
-					}
-
-                    //finalMessage = message.substring(message.indexOf(":") + 1);
+                    String[] parts = message.split(":");
+                    if (parts.length >= 3 && parts[1].equals("WINNER")) {
+                        String winnerID = parts[2];
+                        String winnerScore = parts.length > 3 ? parts[3] : "0";
+                        JPanel gameOverMessage = new JPanel();
+    
+                        if (winnerID.equals(clientID)) {
+                            finalMessage = "<html><center>Winner winner, chicken dinner!<br>You won the game with a score of " + winnerScore + "!</center></html>";
+                        } else {
+                            finalMessage = "<html><center>L is for Loser!<br>You lost the game with a score of " + currentScore + "<br>The winner is " + winnerID + " with a score of " + winnerScore + "!</center></html>";
+                        }
+                    }
                 }
-                
-				// JOptionPane.showMessageDialog(window, finalMessage);
-                
-
-				JLabel gameOverLabel = new JLabel(finalMessage);
-				//gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
-				gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-				
-				JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
-				
+    
+                JLabel gameOverLabel = new JLabel(finalMessage);
+                gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    
+                JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
+    
                 cleanupResources();
                 window.dispose();
-            }
-            else if (message.equals("ACK")) {
+            } else if (message.equals("ACK")) {
                 // Handle buzz-in acknowledgment
                 JOptionPane.showMessageDialog(window, "You buzzed in first! Select your answer.");
                 for (JRadioButton option : options) {
@@ -242,18 +238,11 @@ public class ClientWindow implements ActionListener {
                 poll.setEnabled(false);
                 stopTimer(); // Stop the question timer
                 startTimer(10); // 10 seconds to answer once buzzed in
-            }
-            else if (message.equals("NEGATIVE-ACK")) {
+            } else if (message.equals("NEGATIVE-ACK")) {
                 // Handle negative acknowledgment
                 JOptionPane.showMessageDialog(window, "Someone else buzzed in first!");
                 poll.setEnabled(false);
-            }
-            else if (message.equals("NEXT")) {
-                // Handle next question notification
-                JOptionPane.showMessageDialog(window, "Moving to next question...");
-                stopTimer();
-            }
-            else {
+            } else {
                 // Handle unrecognized messages
                 System.out.println("Unknown message from server: " + message);
             }

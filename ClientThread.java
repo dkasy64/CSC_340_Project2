@@ -150,7 +150,7 @@ public class ClientThread implements Runnable {
             out.println("ERROR:Invalid question index");
             return;
         }
-        
+    
         // Extract answer
         String answer;
         if (message.equals("ANSWER:TIMEOUT")) {
@@ -163,14 +163,14 @@ public class ClientThread implements Runnable {
         } else {
             answer = message.substring("ANSWER:".length());
         }
-        
-        // Get correct answer from the question (format: Q#|Question|Option1|Option2|Option3|Option4|CorrectAnswer)
+    
+        // Get correct answer from the question
         String[] questionParts = questions.get(currentQuestionIndex - 1).split("\\|");
         String correctAnswer = questionParts[6];  // The 7th part is the correct answer (index 6)
-        
+    
         System.out.println(clientId + " answered: " + answer);
         System.out.println("Correct answer was: " + correctAnswer);
-        
+    
         // Check if answer is correct
         if (answer.trim().equals(correctAnswer.trim())) {
             clientScores.put(clientId, clientScores.get(clientId) + 10);
@@ -181,8 +181,16 @@ public class ClientThread implements Runnable {
             out.println("WRONG:Your score is now " + clientScores.get(clientId));
             System.out.println(clientId + " answered incorrectly (-10 points)");
         }
-        
+    
         printScores(); // Update scores after each answer
+    
+        // Unfreeze all clients
+        synchronized (activeClients) {
+            for (ClientThread client : activeClients) {
+                client.getWriter().println("UNFREEZE");
+            }
+        }
+    
         sendNextQuestion();
     }
     

@@ -41,83 +41,38 @@ public class UDPThread implements Runnable {
     private void handleBuzz(String message) {
         System.out.println("DEBUG - Handling buzz: " + message);
         try {
-
             String[] parts = message.split(":");
-
             if (parts.length >= 3) {
-
                 String clientId = parts[1];
-
                 int questionNumber = Integer.parseInt(parts[2]);
-
-   
-
+    
                 synchronized (activeClients) {
-
                     ClientThread buzzedClient = null;
-
-   
-
+    
                     // Find the client who buzzed in
-
                     for (ClientThread client : activeClients) {
-
                         if (client.getClientId().equals(clientId)) {
-
                             buzzedClient = client;
-
                             break;
-
                         }
-
                     }
-
-   
-
+    
                     if (buzzedClient != null) {
-
-                        // Send ACK to the client who buzzed in first
-
+                        // Send ACK to the client who buzzed in
                         buzzedClient.getWriter().println("ACK");
-
-   
-
-                        // Send NEGATIVE-ACK to all other clients on the same question
-
+    
+                        // Send FREEZE to all other clients
                         for (ClientThread client : activeClients) {
-
-                            if (!client.getClientId().equals(clientId) &&
-
-                                client.getCurrentQuestionIndex() == questionNumber) {
-
-                                client.getWriter().println("NEGATIVE-ACK");
-
+                            if (!client.getClientId().equals(clientId)) {
+                                client.getWriter().println("FREEZE");
                             }
-
                         }
-
-   
-
-                        // Notify all clients to move to the next question
-
-                        for (ClientThread client : activeClients) {
-
-                            client.notifyTimeout(); // This sends a "NEXT" message
-
-                        }
-
                     }
-
                 }
-
             }
-
         } catch (Exception e) {
-
             System.err.println("Error processing buzz: " + e.getMessage());
-
             e.printStackTrace();
-
         }
     }
 }
