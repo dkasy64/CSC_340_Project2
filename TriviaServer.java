@@ -22,7 +22,6 @@ public class TriviaServer {
             new Thread(udpThread).start();
             System.out.println("UDP service started on port " + UDP_PORT);
             
-             
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> {
                 try {
@@ -36,7 +35,7 @@ public class TriviaServer {
                     e.printStackTrace();
                 }
             });
-            
+
             // Start TCP server
             try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
                 System.out.println("Trivia Server started on port " + TCP_PORT);

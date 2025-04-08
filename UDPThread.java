@@ -41,49 +41,48 @@ public class UDPThread implements Runnable {
     private void handleBuzz(String message) {
         System.out.println("DEBUG - Handling buzz: " + message);
         try {
-            // Format expected: BUZZ:ClientID:QuestionNumber
             String[] parts = message.split(":");
             if (parts.length >= 3) {
                 String clientId = parts[1];
                 int questionNumber = Integer.parseInt(parts[2]);
-                
-                System.out.println("Processing buzz from " + clientId + " for question " + questionNumber);
-                
-                // Print all active client IDs for debugging
-                System.out.println("Currently active clients:");
-                for (ClientThread client : activeClients) {
-                    System.out.println("- " + client.getClientId() + " (on question " + client.getCurrentQuestionIndex() + ")");
-                }
-                
-                // Find the client who buzzed in first for this question
+    
                 synchronized (activeClients) {
-                    ClientThread buzzedClient = null;
-                    
-                    // Find the client who buzzed in
+                    // Check if anyone has already buzzed in for this question
+                    boolean alreadyBuzzed = false;
                     for (ClientThread client : activeClients) {
-                        if (client.getClientId().equals(clientId)) {
-                            buzzedClient = client;
-                            System.out.println("Found client thread for " + clientId);
-                            System.out.println("Client question index: " + client.getCurrentQuestionIndex());
+                        if (client.hasBuzzedInFirst()) {
+                            alreadyBuzzed = true;
                             break;
                         }
                     }
                     
-                    if (buzzedClient != null) {
-                        // Send ACK to the client who buzzed in first
-                        buzzedClient.getWriter().println("ACK");
-                        System.out.println("Sent ACK to " + clientId + " for question " + questionNumber);
-                        
-                        // Send NEGATIVE-ACK to all other clients on the same question
-                        for (ClientThread client : activeClients) {
-                            if (!client.getClientId().equals(clientId) && 
-                                client.getCurrentQuestionIndex() == questionNumber) {
-                                client.getWriter().println("NEGATIVE-ACK");
-                                System.out.println("Sent NEGATIVE-ACK to " + client.getClientId());
-                            }
+                    ClientThread buzzedClient = null;
+                    // Find the client who buzzed in
+                    for (ClientThread client : activeClients) {
+                        if (client.getClientId().equals(clientId)) {
+                            buzzedClient = client;
+                            break;
                         }
-                    } else {
-                        System.out.println("Could not find client thread for " + clientId);
+                    }
+    
+                    if (buzzedClient != null) {
+                        // If no one has buzzed in yet, this client is first
+                        if (!alreadyBuzzed) {
+                            buzzedClient.setBuzzedInFirst(true);
+                            buzzedClient.getWriter().println("ACK");
+                            System.out.println(clientId + " buzzed in first for question " + questionNumber);
+                            
+                            // Send NEGATIVE-ACK to all other clients
+                            for (ClientThread client : activeClients) {
+                                if (!client.getClientId().equals(clientId)) {
+                                    client.getWriter().println("NEGATIVE-ACK");
+                                }
+                            }
+                        } else {
+                            // Someone else already buzzed in
+                            buzzedClient.getWriter().println("NEGATIVE-ACK");
+                            System.out.println(clientId + " buzzed in but was not first");
+                        }
                     }
                 }
             }

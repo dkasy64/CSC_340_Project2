@@ -1,7 +1,7 @@
-Q1|What is Dr. J’s first name?|Cheetah|Chaten|Jaiswal|Chetan|Chetan
+Q1|What is Dr. J's first name?|Cheetah|Chaten|Jaiswal|Chetan|Chetan
 Q2|How many lunches are owned in Section 2 of CSC340?|2|3|2.5|1.5|2.5
 Q3|What is Dr. J’s rate my professor rating?|5.0|2.98|4.2|3.8|3.8
-Q4|Consider a packet of length L that begins at end system A and travels over three links to a destination end system. These three links are connected by two packet switches. Let di, si, and Ri denote the length, propagation speed, and the transmission rate of link i, for i = 1, 2, 3. The packet switch delays each packet by dproc. Assuming no queuing delays, in terms of di, si, Ri (i = 1,2,3), and L, what is the total end-to-end delay for the packet?|64 ms|102 ms|54 ms|25 ms|64 ms
+Q4|In terms of di, si, Ri (i = 1,2,3), and L, what is the total end-to-end delay for packet L?|64 ms|102 ms|54 ms|25 ms|64 ms
 Q5|What’s Dr. J’s favorite football team?|Detroit Lions|Philadelphia Eagles|Kansas City Chiefs|NY Giants|Kansas City Chiefs
 Q6|What is  Dr. J’s favorite type of computer?|Mac|Mac|Linux|Mac|Linux 
 Q7|What’s the minimum amount of time required to pass this class?|5 hours every day|2 hours every day|3 hours every day|25 hours every day|2 hours every day
