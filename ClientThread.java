@@ -186,11 +186,15 @@ public class ClientThread implements Runnable {
     public static void printScores() {
         System.out.println("\nCurrent Scores:");
         clientScores.forEach((client, score) -> 
-            System.out.println(client + ": " + score));
+        System.out.println(client + ": " + score));
         System.out.println();
     }
 
     private void handleAnswer(String message) {
+        if(gameOver) {
+            return;
+        }
+
         if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.size()) {
             out.println("ERROR:Invalid question index");
             return;
