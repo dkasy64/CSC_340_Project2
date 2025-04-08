@@ -10,6 +10,9 @@ import java.net.SocketException;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
+import java.awt.Font;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 public class ClientWindow implements ActionListener {
     // GUI Components
@@ -21,6 +24,13 @@ public class ClientWindow implements ActionListener {
     private JLabel timer;
     private JLabel score;
     private JFrame window;
+    private Font customFont;
+	private Font boldCustomFont;
+	private Font italicCustomFont;
+	private Color backgroundColor;
+	private Color titleColor;
+	private Color correctAnswerColor;
+	private Color wrongAnswerColor;
     
     // Game Logic
     private TimerTask clock;
@@ -39,6 +49,64 @@ public class ClientWindow implements ActionListener {
         this.in = in;
         this.clientID = clientID;  // This will be updated when server sends WELCOME message
         
+
+		customFont = CustomFont.loadCustomFont("/font/x12y12pxMaruMinyaM.ttf").deriveFont(21f);
+		boldCustomFont = customFont.deriveFont(Font.BOLD);
+		italicCustomFont = customFont.deriveFont(Font.ITALIC);
+		backgroundColor = new Color(221, 251, 248);
+		titleColor = new Color(13, 203, 202);
+		correctAnswerColor = new Color(7, 139, 31);
+		wrongAnswerColor = new Color(225, 0, 0);
+        
+        JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+		JLabel messageLabel = new JLabel(" Welcome to CSC340 Trivia!");
+		messageLabel.setFont(boldCustomFont.deriveFont(50f));
+
+		JLabel testKnowledgeLabel = new JLabel("Are you ready to test your knowledge of CSC340?");
+		testKnowledgeLabel.setFont(boldCustomFont.deriveFont(30f));
+
+		//Names are in alphabetical order btw :)
+		JLabel namesLabel = new JLabel("Created by: Dawit Kasy, Tuana Turhan, Natalie Spiska");
+		namesLabel.setFont(italicCustomFont.deriveFont(25f));
+
+		messageLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		messageLabel.setForeground(titleColor);
+		testKnowledgeLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		namesLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+
+		panel.add(messageLabel);
+		panel.add(Box.createVerticalStrut(10));
+		panel.add(testKnowledgeLabel);
+		panel.add(Box.createVerticalStrut(10));
+		panel.add(namesLabel);
+
+		//All of this is to delete the stupid button
+		////////////////////////////////////////////////////////////////////////////////////////
+		//JOptionPane.showMessageDialog(null, panel, "Welcome", JOptionPane.PLAIN_MESSAGE);
+
+		JOptionPane optionPane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
+		JDialog dialog = optionPane.createDialog("Welcome");
+		//removes the OK button from the screen
+		optionPane.setOptions(new Object[] {});
+
+		JButton customButton = new JButton("I'm ready!");
+		customButton.setBackground(titleColor);
+		customButton.setFont(customFont.deriveFont(20f));
+		customButton.addActionListener(e -> dialog.dispose());
+
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		buttonPanel.add(customButton);
+
+		dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+		dialog.setSize(800, 230);
+		dialog.setLocationRelativeTo(null);
+		dialog.setVisible(true);
+
+		////////////////////////////////////////////////////////////////////////////////////////
+
+
         try {
             this.clientNetwork = new ClientNetwork(clientID, serverIP);
             System.out.println("Client network initialized with ID: " + clientID);
@@ -53,8 +121,11 @@ public class ClientWindow implements ActionListener {
 
     private void initializeGUI() {
         window = new JFrame("Trivia Game - " + clientID);
+        window.getContentPane().setBackground(backgroundColor);
+		window.setFont(boldCustomFont.deriveFont(12f));
         window.setLayout(null);
-        window.setSize(400, 400);
+        window.setSize(400, 400);	
+		window.setLocationRelativeTo(null);
         window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Add window close listener
@@ -84,22 +155,26 @@ public class ClientWindow implements ActionListener {
 
         // Timer
         timer = new JLabel("--");
+        timer.setFont(customFont.deriveFont(12f));
         timer.setBounds(250, 250, 100, 20);
         window.add(timer);
 
         // Score
         score = new JLabel("SCORE: 0");
+        score.setFont(customFont.deriveFont(12f));
         score.setBounds(50, 250, 100, 20);
         window.add(score);
 
         // Buttons
         poll = new JButton("Poll (Buzz)");
+        poll.setFont(customFont.deriveFont(12f));
         poll.setBounds(10, 300, 120, 20);
         poll.addActionListener(this);
         poll.setEnabled(false);  // Disabled until first question arrives
         window.add(poll);
 
         submit = new JButton("Submit");
+        submit.setFont(customFont.deriveFont(12f));
         submit.setBounds(200, 300, 100, 20);
         submit.addActionListener(this);
         submit.setEnabled(false);  // Disabled initially
@@ -158,7 +233,9 @@ public class ClientWindow implements ActionListener {
                 
                 if (parts.length >= 6) {
                     question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
+                    question.setFont(customFont.deriveFont(12f));
                     for (int i = 0; i < options.length && i < 4; i++) {
+                        options[i].setFont(customFont.deriveFont(12f));
                         options[i].setText(parts[i + 2]);
                         options[i].setEnabled(false); // Disable until buzzed in
                     }
@@ -179,7 +256,15 @@ public class ClientWindow implements ActionListener {
                     currentScore += 10;
                 }
                 score.setText("SCORE: " + currentScore);
-                JOptionPane.showMessageDialog(window, "Correct! Your score is now " + currentScore);
+                JLabel correctLabel = new JLabel("Correct! Your score is now " + currentScore);
+				correctLabel.setFont(boldCustomFont.deriveFont(18f));
+				correctLabel.setForeground(correctAnswerColor);	
+
+				JPanel correctPanel = new JPanel();
+				correctPanel.add(correctLabel);
+
+				JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+
                 optionGroup.clearSelection();
                 stopTimer();
             }
@@ -192,7 +277,15 @@ public class ClientWindow implements ActionListener {
                     currentScore = Math.max(0, currentScore - 10); // Prevent negative score
                 }
                 score.setText("SCORE: " + currentScore);
-                JOptionPane.showMessageDialog(window, "Wrong answer! Your score is now " + currentScore);
+                JLabel wrongLabel = new JLabel("Wrong answer! Your score is now " + currentScore);
+				wrongLabel.setFont(boldCustomFont.deriveFont(18f));
+				wrongLabel.setForeground(wrongAnswerColor);	
+
+				JPanel wrongPanel = new JPanel();
+				wrongPanel.add(wrongLabel);
+				
+                JOptionPane.showMessageDialog(window, wrongPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+
                 optionGroup.clearSelection();
                 stopTimer();
             }
@@ -216,15 +309,12 @@ public class ClientWindow implements ActionListener {
 
 						}
 					}
-
-                    //finalMessage = message.substring(message.indexOf(":") + 1);
                 }
                 
 				// JOptionPane.showMessageDialog(window, finalMessage);
-                
 
 				JLabel gameOverLabel = new JLabel(finalMessage);
-				//gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
+				gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
 				gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
 				
 				JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
@@ -234,7 +324,15 @@ public class ClientWindow implements ActionListener {
             }
             else if (message.equals("ACK")) {
                 // Handle buzz-in acknowledgment
-                JOptionPane.showMessageDialog(window, "You buzzed in first! Select your answer.");
+                JLabel buzzLabel = new JLabel("You buzzed in first! Select your answer.");
+				buzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
+				buzzLabel.setForeground(Color.BLACK);
+
+				JPanel buzzPanel = new JPanel();
+				buzzPanel.add(buzzLabel);
+
+				JOptionPane.showMessageDialog(window, buzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+			
                 for (JRadioButton option : options) {
                     option.setEnabled(true);
                 }
@@ -245,7 +343,16 @@ public class ClientWindow implements ActionListener {
             }
             else if (message.equals("NEGATIVE-ACK")) {
                 // Handle negative acknowledgment
-                JOptionPane.showMessageDialog(window, "Someone else buzzed in first!");
+               ////////// 
+				JLabel otherBuzzLabel = new JLabel("Someone else buzzed in first!");
+				otherBuzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
+				otherBuzzLabel.setForeground(Color.BLACK);
+
+				JPanel otherBuzzPanel = new JPanel();
+				otherBuzzPanel.add(otherBuzzLabel);
+
+				JOptionPane.showMessageDialog(window, otherBuzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+				/////////// 
                 poll.setEnabled(false);
             }
             else if (message.equals("NEXT")) {
