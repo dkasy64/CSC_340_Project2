@@ -40,55 +40,83 @@ public class UDPThread implements Runnable {
     
     private void handleBuzz(String message) {
         try {
-            // Format expected: BUZZ:ClientID:QuestionNumber
+
             String[] parts = message.split(":");
+
             if (parts.length >= 3) {
+
                 String clientId = parts[1];
+
                 int questionNumber = Integer.parseInt(parts[2]);
-                
-                System.out.println("Processing buzz from " + clientId + " for question " + questionNumber);
-                
-                // Print all active client IDs for debugging
-                System.out.println("Currently active clients:");
-                for (ClientThread client : activeClients) {
-                    System.out.println("- " + client.getClientId() + " (on question " + client.getCurrentQuestionIndex() + ")");
-                }
-                
-                // Find the client who buzzed in first for this question
+
+   
+
                 synchronized (activeClients) {
+
                     ClientThread buzzedClient = null;
-                    
+
+   
+
                     // Find the client who buzzed in
+
                     for (ClientThread client : activeClients) {
+
                         if (client.getClientId().equals(clientId)) {
+
                             buzzedClient = client;
-                            System.out.println("Found client thread for " + clientId);
-                            System.out.println("Client question index: " + client.getCurrentQuestionIndex());
+
                             break;
+
                         }
+
                     }
-                    
+
+   
+
                     if (buzzedClient != null) {
+
                         // Send ACK to the client who buzzed in first
+
                         buzzedClient.getWriter().println("ACK");
-                        System.out.println("Sent ACK to " + clientId + " for question " + questionNumber);
-                        
+
+   
+
                         // Send NEGATIVE-ACK to all other clients on the same question
+
                         for (ClientThread client : activeClients) {
-                            if (!client.getClientId().equals(clientId) && 
+
+                            if (!client.getClientId().equals(clientId) &&
+
                                 client.getCurrentQuestionIndex() == questionNumber) {
+
                                 client.getWriter().println("NEGATIVE-ACK");
-                                System.out.println("Sent NEGATIVE-ACK to " + client.getClientId());
+
                             }
+
                         }
-                    } else {
-                        System.out.println("Could not find client thread for " + clientId);
+
+   
+
+                        // Notify all clients to move to the next question
+
+                        for (ClientThread client : activeClients) {
+
+                            client.notifyTimeout(); // This sends a "NEXT" message
+
+                        }
+
                     }
+
                 }
+
             }
+
         } catch (Exception e) {
+
             System.err.println("Error processing buzz: " + e.getMessage());
+
             e.printStackTrace();
+
         }
     }
 }
