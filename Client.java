@@ -19,7 +19,7 @@ public class Client {
             System.out.println("Connected to server with temporary ID: " + tempClientId);
             
             // The ClientWindow will receive and use the correct server-assigned ID
-            clientWindow = new ClientWindow(out, in, tempClientId);
+            clientWindow = new ClientWindow(out, in, tempClientId, serverIP);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Cannot connect to server: " + e.getMessage());
             e.printStackTrace();

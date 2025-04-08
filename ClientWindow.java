@@ -34,13 +34,14 @@ public class ClientWindow implements ActionListener {
     private ClientNetwork clientNetwork;
     private String clientID;  // Changed from final to modifiable
 
-    public ClientWindow(PrintWriter out, BufferedReader in, String clientID) {
+    public ClientWindow(PrintWriter out, BufferedReader in, String clientID, String serverIP) {
         this.out = out;
         this.in = in;
         this.clientID = clientID;  // This will be updated when server sends WELCOME message
         
         try {
-            this.clientNetwork = new ClientNetwork(clientID);
+            this.clientNetwork = new ClientNetwork(clientID, serverIP);
+            System.out.println("Client network initialized with ID: " + clientID);
         } catch (SocketException e) {
             JOptionPane.showMessageDialog(null, "Network error: " + e.getMessage());
             e.printStackTrace();
@@ -162,6 +163,7 @@ public class ClientWindow implements ActionListener {
                         options[i].setEnabled(false); // Disable until buzzed in
                     }
                     optionGroup.clearSelection();
+                    stopTimer();
                     startTimer(15); // Start question timer
                     poll.setEnabled(true);
                     submit.setEnabled(false);
@@ -195,12 +197,38 @@ public class ClientWindow implements ActionListener {
                 stopTimer();
             }
             else if (message.startsWith("GAME_OVER")) {
-                // Handle game end
                 String finalMessage = "Game Over!";
                 if (message.contains(":")) {
-                    finalMessage = message.substring(message.indexOf(":") + 1);
+					String[] parts = message.split(":");
+					if (parts.length >= 3 && parts[1].equals("WINNER")) {
+						String winnerID = parts[2];
+						String winnerScore = parts.length > 3 ? parts[3] : "0";
+						JPanel gameOverMessage = new JPanel();
+
+						if(winnerID.equals(clientID)) {
+							//finalMessage = "Winner winner, chicken dinner!\n You won the game with a score of " + winnerScore + "!";
+							//JLabel finalMessage = new JLabel("<html><center>Winner winner, chicken dinner!<br>You won the game with a score of \" + winnerScore + \"!</center></html>");
+							finalMessage = "<html><center>Winner winner, chicken dinner!<br>You won the game with a score of " + winnerScore + "!</center></html>";
+							//finalMessage.setFont(boldCustomFont.deriveFont(18f));
+						} else {
+							//finalMessage = "L is for Loser! \n You lost the game with a score of " + currentScore + "!\n The winner is " + winnerID + " with a score of " + winnerScore + "!";
+							finalMessage = "<html><center>L is for Loser!<br>You lost the game with a score of " + currentScore + "<br>The winner is " + winnerID + " with a score of " + winnerScore + "!</center></html>";
+
+						}
+					}
+
+                    //finalMessage = message.substring(message.indexOf(":") + 1);
                 }
-                JOptionPane.showMessageDialog(window, finalMessage);
+                
+				// JOptionPane.showMessageDialog(window, finalMessage);
+                
+
+				JLabel gameOverLabel = new JLabel(finalMessage);
+				//gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
+				gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
+				
+				JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
+				
                 cleanupResources();
                 window.dispose();
             }

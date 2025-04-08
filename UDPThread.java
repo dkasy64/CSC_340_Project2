@@ -39,6 +39,7 @@ public class UDPThread implements Runnable {
     }
     
     private void handleBuzz(String message) {
+        System.out.println("DEBUG - Handling buzz: " + message);
         try {
 
             String[] parts = message.split(":");

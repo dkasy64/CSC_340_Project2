@@ -16,6 +16,7 @@ public class ClientThread implements Runnable {
     private static Map<String, Integer> clientScores = new HashMap<>();
     private String clientId;
     private boolean buzzedInFirst = false;
+    private boolean gameOver = false;
 
     public ClientThread(Socket socket, Queue<String> udpQueue, List<ClientThread> activeClients, List<String> questions) throws IOException {
         this.clientSocket = socket;
@@ -66,7 +67,9 @@ public class ClientThread implements Runnable {
             String clientMessage;
             while ((clientMessage = in.readLine()) != null) {
                 System.out.println("Received from " + clientId + ": " + clientMessage);
-                
+                if(gameOver) {
+                    break;
+                 }
                 // Process client messages
                 if (clientMessage.startsWith("ANSWER:")) {
                     handleAnswer(clientMessage);
@@ -91,6 +94,9 @@ public class ClientThread implements Runnable {
     }
 
     private void sendNextQuestion() {
+        if(gameOver){
+            return;
+        }
         if (currentQuestionIndex < questions.size()) {
             out.println("QUESTION:" + questions.get(currentQuestionIndex));
             System.out.println("Sent question " + (currentQuestionIndex + 1) + " to " + clientId);
@@ -98,9 +104,37 @@ public class ClientThread implements Runnable {
             // Reset buzz status for new question
             buzzedInFirst = false;
         } else {
-            out.println("GAME_OVER:Final score: " + clientScores.get(clientId));
-            System.out.println(clientId + " completed all questions with score: " + 
-                clientScores.get(clientId));
+            gameOver = true;
+
+            String winnerID = null;
+            int winnerScore = Integer.MIN_VALUE;
+
+            synchronized (activeClients) {
+                for (ClientThread client : activeClients) {
+                    // Check if the client has a higher score
+                    if (clientScores.containsKey(client.getClientId())) {
+                        int clientScore = clientScores.get(client.getClientId());
+                        if (clientScore > winnerScore) {
+                            winnerScore = clientScore;
+                            winnerID = client.getClientId();
+                        }
+                    }
+                }
+
+                String gameOverMessage = "GAME_OVER:WINNER:" + winnerID + ":" + winnerScore;
+
+                synchronized (activeClients) {
+                    for (ClientThread client : activeClients) {
+                        client.getWriter().println(gameOverMessage);
+                    }
+                }
+
+                System.out.println("Game over. Winner: " + winnerID + " with score: " + winnerScore);
+            }
+
+            // out.println("GAME_OVER:Final score: " + clientScores.get(clientId));
+            // System.out.println(clientId + " completed all questions with score: " + 
+            //     clientScores.get(clientId));
         }
     }
 
