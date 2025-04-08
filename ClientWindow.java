@@ -26,12 +26,12 @@ public class ClientWindow implements ActionListener {
     private JLabel score;
     private JFrame window;
     private Font customFont;
-	private Font boldCustomFont;
-	private Font italicCustomFont;
-	private Color backgroundColor;
-	private Color titleColor;
-	private Color correctAnswerColor;
-	private Color wrongAnswerColor;
+    private Font boldCustomFont;
+    private Font italicCustomFont;
+    private Color backgroundColor;
+    private Color titleColor;
+    private Color correctAnswerColor;
+    private Color wrongAnswerColor;
     
     // Game Logic
     private TimerTask clock;
@@ -50,63 +50,61 @@ public class ClientWindow implements ActionListener {
         this.in = in;
         this.clientID = clientID;  // This will be updated when server sends WELCOME message
         
-
-		customFont = CustomFont.loadCustomFont("/font/x12y12pxMaruMinyaM.ttf").deriveFont(21f);
-		boldCustomFont = customFont.deriveFont(Font.BOLD);
-		italicCustomFont = customFont.deriveFont(Font.ITALIC);
-		backgroundColor = new Color(221, 251, 248);
-		titleColor = new Color(13, 203, 202);
-		correctAnswerColor = new Color(7, 139, 31);
-		wrongAnswerColor = new Color(225, 0, 0);
+        customFont = CustomFont.loadCustomFont("/font/x12y12pxMaruMinyaM.ttf").deriveFont(21f);
+        boldCustomFont = customFont.deriveFont(Font.BOLD);
+        italicCustomFont = customFont.deriveFont(Font.ITALIC);
+        backgroundColor = new Color(221, 251, 248);
+        titleColor = new Color(13, 203, 202);
+        correctAnswerColor = new Color(7, 139, 31);
+        wrongAnswerColor = new Color(225, 0, 0);
         
         JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		JLabel messageLabel = new JLabel(" Welcome to CSC340 Trivia!");
-		messageLabel.setFont(boldCustomFont.deriveFont(50f));
+        JLabel messageLabel = new JLabel(" Welcome to CSC340 Trivia!");
+        messageLabel.setFont(boldCustomFont.deriveFont(50f));
 
-		JLabel testKnowledgeLabel = new JLabel("Are you ready to test your knowledge of CSC340?");
-		testKnowledgeLabel.setFont(boldCustomFont.deriveFont(30f));
+        JLabel testKnowledgeLabel = new JLabel("Are you ready to test your knowledge of CSC340?");
+        testKnowledgeLabel.setFont(boldCustomFont.deriveFont(30f));
 
-		//Names are in alphabetical order btw :)
-		JLabel namesLabel = new JLabel("Created by: Dawit Kasy, Tuana Turhan, Natalie Spiska");
-		namesLabel.setFont(italicCustomFont.deriveFont(25f));
+        //Names are in alphabetical order btw :)
+        JLabel namesLabel = new JLabel("Created by: Dawit Kasy, Tuana Turhan, Natalie Spiska");
+        namesLabel.setFont(italicCustomFont.deriveFont(25f));
 
-		messageLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-		messageLabel.setForeground(titleColor);
-		testKnowledgeLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-		namesLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        messageLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        messageLabel.setForeground(titleColor);
+        testKnowledgeLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        namesLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
 
-		panel.add(messageLabel);
-		panel.add(Box.createVerticalStrut(10));
-		panel.add(testKnowledgeLabel);
-		panel.add(Box.createVerticalStrut(10));
-		panel.add(namesLabel);
+        panel.add(messageLabel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(testKnowledgeLabel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(namesLabel);
 
-		//All of this is to delete the stupid button
-		////////////////////////////////////////////////////////////////////////////////////////
-		//JOptionPane.showMessageDialog(null, panel, "Welcome", JOptionPane.PLAIN_MESSAGE);
+        //All of this is to delete the stupid button
+        ////////////////////////////////////////////////////////////////////////////////////////
+        //JOptionPane.showMessageDialog(null, panel, "Welcome", JOptionPane.PLAIN_MESSAGE);
 
-		JOptionPane optionPane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
-		JDialog dialog = optionPane.createDialog("Welcome");
-		//removes the OK button from the screen
-		optionPane.setOptions(new Object[] {});
+        JOptionPane optionPane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
+        JDialog dialog = optionPane.createDialog("Welcome");
+        //removes the OK button from the screen
+        optionPane.setOptions(new Object[] {});
 
-		JButton customButton = new JButton("I'm ready!");
-		customButton.setBackground(titleColor);
-		customButton.setFont(customFont.deriveFont(20f));
-		customButton.addActionListener(e -> dialog.dispose());
+        JButton customButton = new JButton("I'm ready!");
+        customButton.setBackground(titleColor);
+        customButton.setFont(customFont.deriveFont(20f));
+        customButton.addActionListener(e -> dialog.dispose());
 
-		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		buttonPanel.add(customButton);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(customButton);
 
-		dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		dialog.setSize(800, 230);
-		dialog.setLocationRelativeTo(null);
-		dialog.setVisible(true);
+        dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setSize(800, 230);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
 
-		////////////////////////////////////////////////////////////////////////////////////////
-
+        ////////////////////////////////////////////////////////////////////////////////////////
 
         try {
             this.clientNetwork = new ClientNetwork(clientID, serverIP);
@@ -123,10 +121,10 @@ public class ClientWindow implements ActionListener {
     private void initializeGUI() {
         window = new JFrame("Trivia Game - " + clientID);
         window.getContentPane().setBackground(backgroundColor);
-		window.setFont(boldCustomFont.deriveFont(12f));
+        window.setFont(boldCustomFont.deriveFont(12f));
         window.setLayout(null);
-        window.setSize(400, 400);	
-		window.setLocationRelativeTo(null);
+        window.setSize(400, 400);    
+        window.setLocationRelativeTo(null);
         window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Add window close listener
@@ -207,7 +205,7 @@ public class ClientWindow implements ActionListener {
                 JOptionPane.showMessageDialog(window, "Disconnected from server");
                 window.dispose();
                 return;
-            }else if (message.equals("NEXT")) {
+            } else if (message.equals("NEXT")) {
                 // Handle next question notification
                 JOptionPane.showMessageDialog(window, "Moving to next question...");
                 stopTimer();
@@ -233,11 +231,9 @@ public class ClientWindow implements ActionListener {
                 String[] parts = questionData.split("\\|");
                 
                 if (parts.length >= 6) {
-
                     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
                     ge.registerFont(customFont);
 
-                    //question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
                     question.setText("<html><span style=\"font-family: 'x12y12pxMaruMinyaM'; font-size: 16px;\">" + parts[0] + ". " + parts[1] + "</span></html>");
                     for (int i = 0; i < options.length && i < 4; i++) {
                         options[i].setFont(customFont.deriveFont(12f));
@@ -245,10 +241,10 @@ public class ClientWindow implements ActionListener {
                         options[i].setEnabled(false); // Disable until buzzed in
                     }
                     optionGroup.clearSelection();
-                    stopTimer();
-                    startTimer(15); // Start question timer
-                    poll.setEnabled(true);
-                    submit.setEnabled(false);
+                    stopTimer(); // Stop any existing timer
+                    startTimer(15); // Start 15-second timer for buzzing in
+                    poll.setEnabled(true); // Enable buzz button
+                    submit.setEnabled(false); // Disable submit until buzzed in
                     currentQuestionIndex++;
                 }
             }
@@ -262,16 +258,17 @@ public class ClientWindow implements ActionListener {
                 }
                 score.setText("SCORE: " + currentScore);
                 JLabel correctLabel = new JLabel("Correct! Your score is now " + currentScore);
-				correctLabel.setFont(boldCustomFont.deriveFont(18f));
-				correctLabel.setForeground(correctAnswerColor);	
+                correctLabel.setFont(boldCustomFont.deriveFont(18f));
+                correctLabel.setForeground(correctAnswerColor);    
 
-				JPanel correctPanel = new JPanel();
-				correctPanel.add(correctLabel);
+                JPanel correctPanel = new JPanel();
+                correctPanel.add(correctLabel);
 
-				JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
 
                 optionGroup.clearSelection();
-                stopTimer();
+              //  stopTimer(); // Stop any existing timer
+                // We don't need to start a new timer here - the server will send the next question
             }
             else if (message.startsWith("WRONG:")) {
                 // Handle wrong answer
@@ -283,61 +280,55 @@ public class ClientWindow implements ActionListener {
                 }
                 score.setText("SCORE: " + currentScore);
                 JLabel wrongLabel = new JLabel("Wrong answer! Your score is now " + currentScore);
-				wrongLabel.setFont(boldCustomFont.deriveFont(18f));
-				wrongLabel.setForeground(wrongAnswerColor);	
+                wrongLabel.setFont(boldCustomFont.deriveFont(18f));
+                wrongLabel.setForeground(wrongAnswerColor);    
 
-				JPanel wrongPanel = new JPanel();
-				wrongPanel.add(wrongLabel);
-				
+                JPanel wrongPanel = new JPanel();
+                wrongPanel.add(wrongLabel);
+                
                 JOptionPane.showMessageDialog(window, wrongPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
 
                 optionGroup.clearSelection();
-                stopTimer();
+              //  stopTimer(); // Stop any existing timer
+                // We don't need to start a new timer here - the server will send the next question
             }
             else if (message.startsWith("GAME_OVER")) {
                 String finalMessage = "Game Over!";
                 if (message.contains(":")) {
-					String[] parts = message.split(":");
-					if (parts.length >= 3 && parts[1].equals("WINNER")) {
-						String winnerID = parts[2];
-						String winnerScore = parts.length > 3 ? parts[3] : "0";
-						JPanel gameOverMessage = new JPanel();
+                    String[] parts = message.split(":");
+                    if (parts.length >= 3 && parts[1].equals("WINNER")) {
+                        String winnerID = parts[2];
+                        String winnerScore = parts.length > 3 ? parts[3] : "0";
+                        JPanel gameOverMessage = new JPanel();
 
-						if(winnerID.equals(clientID)) {
-							//finalMessage = "Winner winner, chicken dinner!\n You won the game with a score of " + winnerScore + "!";
-							//JLabel finalMessage = new JLabel("<html><center>Winner winner, chicken dinner!<br>You won the game with a score of \" + winnerScore + \"!</center></html>");
-							finalMessage = "<html><center>Winner winner, chicken dinner!<br>You won the game with a score of " + winnerScore + "!</center></html>";
-							//finalMessage.setFont(boldCustomFont.deriveFont(18f));
-						} else {
-							//finalMessage = "L is for Loser! \n You lost the game with a score of " + currentScore + "!\n The winner is " + winnerID + " with a score of " + winnerScore + "!";
-							finalMessage = "<html><center>L is for Loser!<br>You lost the game with a score of " + currentScore + "<br>The winner is " + winnerID + " with a score of " + winnerScore + "!</center></html>";
-
-						}
-					}
+                        if(winnerID.equals(clientID)) {
+                            finalMessage = "<html><center>Winner winner, chicken dinner!<br>You won the game with a score of " + winnerScore + "!</center></html>";
+                        } else {
+                            finalMessage = "<html><center>L is for Loser!<br>You lost the game with a score of " + currentScore + "<br>The winner is " + winnerID + " with a score of " + winnerScore + "!</center></html>";
+                        }
+                    }
                 }
                 
-				// JOptionPane.showMessageDialog(window, finalMessage);
-
-				JLabel gameOverLabel = new JLabel(finalMessage);
-				gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
-				gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-				
-				JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
-				
+                JLabel gameOverLabel = new JLabel(finalMessage);
+                gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
+                gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                
+                JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
+                
                 cleanupResources();
                 window.dispose();
             }
             else if (message.equals("ACK")) {
                 // Handle buzz-in acknowledgment
                 JLabel buzzLabel = new JLabel("You buzzed in first! Select your answer.");
-				buzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
-				buzzLabel.setForeground(Color.BLACK);
+                buzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                buzzLabel.setForeground(Color.BLACK);
 
-				JPanel buzzPanel = new JPanel();
-				buzzPanel.add(buzzLabel);
+                JPanel buzzPanel = new JPanel();
+                buzzPanel.add(buzzLabel);
 
-				JOptionPane.showMessageDialog(window, buzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
-			
+                JOptionPane.showMessageDialog(window, buzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+            
                 for (JRadioButton option : options) {
                     option.setEnabled(true);
                 }
@@ -348,22 +339,17 @@ public class ClientWindow implements ActionListener {
             }
             else if (message.equals("NEGATIVE-ACK")) {
                 // Handle negative acknowledgment
-               ////////// 
-				JLabel otherBuzzLabel = new JLabel("Someone else buzzed in first!");
-				otherBuzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
-				otherBuzzLabel.setForeground(Color.BLACK);
+                JLabel otherBuzzLabel = new JLabel("Someone else buzzed in first!");
+                otherBuzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                otherBuzzLabel.setForeground(Color.BLACK);
 
-				JPanel otherBuzzPanel = new JPanel();
-				otherBuzzPanel.add(otherBuzzLabel);
+                JPanel otherBuzzPanel = new JPanel();
+                otherBuzzPanel.add(otherBuzzLabel);
 
-				JOptionPane.showMessageDialog(window, otherBuzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
-				/////////// 
+                JOptionPane.showMessageDialog(window, otherBuzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+                
                 poll.setEnabled(false);
-            }
-            else if (message.equals("NEXT")) {
-                // Handle next question notification
-                JOptionPane.showMessageDialog(window, "Moving to next question...");
-                stopTimer();
+                // We don't stop the timer here as we should still see it counting down
             }
             else {
                 // Handle unrecognized messages
@@ -445,12 +431,10 @@ public class ClientWindow implements ActionListener {
                     if (submit.isEnabled()) {
                         out.println("ANSWER:TIMEOUT");  // Inform server about timeout
                         JOptionPane.showMessageDialog(window, "Time's up! -20 points penalty.");
-                    }
-                    
-                    poll.setEnabled(true); // Re-enable the poll button after timeout
-                    submit.setEnabled(false);
-                    for (JRadioButton option : options) {
-                        option.setEnabled(false);
+                    } else {
+                        // Time ran out for buzzing in - no penalty, just disable the poll button
+                        poll.setEnabled(false);
+                        // No need to notify the server - it will move to next question automatically after all clients time out
                     }
                     
                     cancel();
