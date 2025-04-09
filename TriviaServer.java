@@ -54,6 +54,8 @@ public class TriviaServer {
             System.err.println("Server error: " + e.getMessage());
             e.printStackTrace();
         }
+
+        System.out.println("Current working directory: " + System.getProperty("user.dir"));
     }
     
     // Load questions from questions.txt
@@ -83,8 +85,25 @@ public class TriviaServer {
             questionFile = new File("questions.txt");
             try (PrintWriter writer = new PrintWriter(questionFile)) {
                 writer.println("Q1|What is Dr. J's first name?|Cheetah|Chaten|Jaiswal|Chetan|Chetan");
-                writer.println("Q2|How many lunches are owned in Section 2 of CSC340?|2|3|2.5|1.5|2.5");
-                writer.println("Q3|What is the capital of France?|London|Berlin|Paris|Madrid|Paris");
+                writer.println("Q2|How many lunches are owned in Section 2 of CSC340? (Roughly)|2|3|2.5|1.5|2.5");
+                writer.println("Q3|What is Dr. J's Rate My Professor rating?|5.0|2.98|4.2|3.8|3.8");
+                writer.println("Q4|In terms of di, si, Ri (i = 1,2,3), and L, what is the total end-to-end delay for packet L?|64 ms|102 ms|54 ms|25 ms|64 ms");
+                writer.println("Q5|What's Dr. J's favorite football team?|Detroit Lions|Philadelphia Eagles|Kansas City Chiefs|NY Giants|Kansas City Chiefs");
+                writer.println("Q6|Select the correct pair:|UCP & TDP|UDT & TCP|UPC & TPC|UDP & TCP|UDP & TCP");
+                writer.println("Q7|What's the minimum amount of time required to pass this class? (as listed in the syllabus)|5 hours every day|2 hours every day|3 hours every day|25 hours every day|2 hours every day");
+                writer.println("Q8|What does RDR stand for?|Red Dead Rising|Read Deed Redeemption|Red Dead Redemption|Rum Dum Reddening|Red Dead Redemption");
+                writer.println("Q9|Dr. J wants to go on vacation. Where would he choose to go?|Kansas City|Houston|Las Vegas|New York|Las Vegas");
+                writer.println("Q10|What's  Dr. J's favorite type of computer?|Mac|Mac|Linux|Mac|Linux");
+                writer.println("Q11|Peer-Peer nodes can act as both a client and a server|True |True |True |False |True");
+                writer.println("Q12|What is the purpose of the Transportation Layer?|End to end delivery|App to app delivery|Node to node delivery|Ask someone to help you out|App to app delivery");
+                writer.println("Q13|What does pixel stand for?|Picture excellent|Picture matrix|Picture element|Picture perfect|Picture element");
+                writer.println("Q14|What is HTTP v.2 called?|SPDY|QUIC|LGHTNG|SPDR|SPDY");
+                writer.println("Q15|TCP and UDP are protocols of what layer?|Application|Transport|Network|Physical|Application");
+                writer.println("Q16|What does IETF stand for?|Internal Engineering Tech Field|Internet Engineering Task Force|Internet Engaging Track Force| Internet Engineering Tracking Forum|Internet Engineering Task Force");
+                writer.println("Q17|Which of these movies has Dr. J NOT talked about in class?|Antman & the Wasp|John Wick|Mad Max|Matrix|Antman & the Wasp");
+                writer.println("Q18|Yo bro, if you wanna make it into someone's top 4 on BitTorrent, what's the move?|Just vibe and hope they notice you|Seed their torrents like a legend|Slide into their DMs|...Is this written by ChatGPT?|Seed their torrents like a legend");
+                writer.println("Q19|What does HTTP stand for?|Hyper text transfer portal|Hyper transfer text portal|Hype text transfer portal|Hyper tranfer text protocol|Hyper text transfer portal");
+                writer.println("Q20|There's no way you're still playing this game... are you??|Unfortunately, yes|Dr. J is forcing me against my will|Part of my top 5 favorite games tbh|Ofc! Team Lebron the best!|Part of my top 5 favorite games tbh");
             }
             System.out.println("Created sample questions file at: " + questionFile.getAbsolutePath());
         }
