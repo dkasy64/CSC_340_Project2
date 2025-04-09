@@ -60,12 +60,18 @@ public class ClientThread implements Runnable {
             out.println("WELCOME:" + clientId);
             System.out.println("Sent welcome message to " + clientId);
             
-            // Wait until the game starts
+            // Wait until the game starts or is killed
             synchronized (activeClients) {
-                while (!TriviaServer.gameStarted) {
+                while (!TriviaServer.gameStarted && !TriviaServer.gameKilled) {
                     activeClients.wait();
                 }
+                
+                // Check if the game was killed while waiting
+                if (TriviaServer.gameKilled) {
+                    return; // Exit the thread if the game was killed
+                }
             }
+            
             // Send first question
             sendNextQuestion();
             
@@ -73,7 +79,7 @@ public class ClientThread implements Runnable {
             String clientMessage;
             while ((clientMessage = in.readLine()) != null) {
                 System.out.println("Received from " + clientId + ": " + clientMessage);
-                if(gameOver) {
+                if(gameOver || TriviaServer.gameKilled) {
                     break;
                 }
                 // Process client messages
@@ -120,7 +126,7 @@ public class ClientThread implements Runnable {
     }
 
     public void sendNextQuestion() {
-        if(gameOver){
+        if(gameOver || TriviaServer.gameKilled){
             return;
         }
         if (currentQuestionIndex < questions.size()) {
@@ -157,10 +163,6 @@ public class ClientThread implements Runnable {
 
                 System.out.println("Game over. Winner: " + winnerID + " with score: " + winnerScore);
             }
-
-            // out.println("GAME_OVER:Final score: " + clientScores.get(clientId));
-            // System.out.println(clientId + " completed all questions with score: " + 
-            //     clientScores.get(clientId));
         }
     }
 
@@ -172,7 +174,7 @@ public class ClientThread implements Runnable {
     }
 
     private void handleAnswer(String message) {
-        if (gameOver) {
+        if (gameOver || TriviaServer.gameKilled) {
             return;
         }
         if (currentQuestionIndex <= 0 || currentQuestionIndex > questions.size()) {
@@ -213,7 +215,7 @@ public class ClientThread implements Runnable {
         
         printScores(); 
         // Update scores after each answer
-       // Tüm client'ları senkronize et ve sonraki soruya geç
+        // Synchronize all clients and move to the next question
         synchronized (activeClients) {
             for (ClientThread client : activeClients) {
                 client.sendNextQuestion();
