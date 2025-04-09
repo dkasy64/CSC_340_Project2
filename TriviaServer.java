@@ -9,7 +9,8 @@ public class TriviaServer {
     private static Queue<String> udpQueue = new ConcurrentLinkedQueue<>();
     private static List<ClientThread> activeClients = Collections.synchronizedList(new ArrayList<>());
     private static List<String> questions;
-    public  static volatile boolean gameStarted = false;
+    public static volatile boolean gameStarted = false;
+    public static volatile boolean gameKilled = false;
     
     public static void main(String[] args) {
         try {
@@ -22,32 +23,64 @@ public class TriviaServer {
             new Thread(udpThread).start();
             System.out.println("UDP service started on port " + UDP_PORT);
             
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            ExecutorService executor = Executors.newFixedThreadPool(2);
+            
+            // Thread to start the game
             executor.submit(() -> {
                 try {
                     System.out.println("Press ENTER to start the game...");
-                    System.in.read(); // ENTER bekler
+                    System.in.read(); // Wait for ENTER
                     synchronized (activeClients) {
-                        gameStarted = true; // Oyunu başlat
-                        activeClients.notifyAll(); // Tüm bekleyen istemcileri uyandır
+                        if (!gameKilled) {
+                            gameStarted = true; // Start the game
+                            activeClients.notifyAll(); // Wake up all waiting clients
+                            System.out.println("Game started!");
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                }
+            });
+            
+            // Thread to monitor for kill switch
+            executor.submit(() -> {
+                Scanner scanner = new Scanner(System.in);
+                while (true) {
+                    String command = scanner.nextLine().trim();
+                    if (command.equalsIgnoreCase("kill") || command.equalsIgnoreCase("end")) {
+                        System.out.println("Kill switch activated! Ending game for all clients...");
+                        killGame("Game terminated by host");
+                        break;
+                    } else if (command.equalsIgnoreCase("exit") || command.equalsIgnoreCase("quit")) {
+                        System.out.println("Shutting down server...");
+                        System.exit(0);
+                    } else if (!command.isEmpty()) {
+                        System.out.println("Available commands: 'kill' or 'end' to end the game, 'exit' or 'quit' to shut down the server");
+                    }
                 }
             });
 
             // Start TCP server
             try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
                 System.out.println("Trivia Server started on port " + TCP_PORT);
+                System.out.println("Type 'kill' or 'end' to end the game for all clients");
                 
-                while (true) {
-                    Socket clientSocket = serverSocket.accept();
-                    System.out.println("New client connected from " + clientSocket.getInetAddress());
-                    
-                    // Create and start a new thread for this client
-                    ClientThread clientThread = new ClientThread(clientSocket, udpQueue, activeClients, questions);
-                    activeClients.add(clientThread);
-                    new Thread(clientThread).start();
+                while (!gameKilled) {
+                    try {
+                        Socket clientSocket = serverSocket.accept();
+                        System.out.println("New client connected from " + clientSocket.getInetAddress());
+                        
+                        // Create and start a new thread for this client
+                        ClientThread clientThread = new ClientThread(clientSocket, udpQueue, activeClients, questions);
+                        activeClients.add(clientThread);
+                        new Thread(clientThread).start();
+                    } catch (SocketException e) {
+                        if (gameKilled) {
+                            break;
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
             }
         } catch (IOException e) {
@@ -56,6 +89,24 @@ public class TriviaServer {
         }
 
         System.out.println("Current working directory: " + System.getProperty("user.dir"));
+    }
+    
+    /**
+     * Kill the game for all connected clients
+     * @param reason The reason to display to clients
+     */
+    public static void killGame(String reason) {
+        synchronized (activeClients) {
+            gameKilled = true;
+            gameStarted = false;
+            
+            // Notify all clients that the game has been killed
+            for (ClientThread client : activeClients) {
+                client.getWriter().println("GAME_KILLED:" + reason);
+            }
+            
+            activeClients.notifyAll(); // Wake up any waiting threads
+        }
     }
     
     // Load questions from questions.txt
@@ -77,7 +128,8 @@ public class TriviaServer {
                 break;
             }
         }
-            //If file is not found
+        
+        //If file is not found
         if (questionFile == null) {
             System.err.println("WARNING: questions.txt file not found! Creating a sample file with test questions.");
             

@@ -232,17 +232,33 @@ public class ClientWindow implements ActionListener {
                     System.out.println("Server assigned ID: " + this.clientID);
                 }
             }
+            else if (message.startsWith("GAME_KILLED:")) {
+                // Handle game killed message
+                stopTimer();
+                String reason = "Game terminated by host";
+                if (message.contains(":")) {
+                    reason = message.substring("GAME_KILLED:".length());
+                }
+                
+                JLabel gameKilledLabel = new JLabel("<html><center>" + reason + "</center></html>");
+                gameKilledLabel.setFont(boldCustomFont.deriveFont(18f));
+                gameKilledLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                gameKilledLabel.setForeground(wrongAnswerColor);
+                
+                JOptionPane.showMessageDialog(window, gameKilledLabel, "Game Terminated", JOptionPane.WARNING_MESSAGE);
+                
+                cleanupResources();
+                window.dispose();
+            }
             else if (message.startsWith("QUESTION:")) {
-
                 // Extract and display question with options
                 String questionData = message.substring("QUESTION:".length());
                 String[] parts = questionData.split("\\|");
-
+    
                 GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
                 ge.registerFont(customFont);
-
+    
                 if (parts.length >= 6) {
-
                     //question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
                     question.setText("<html><span style=\"font-family: 'x12y12pxMaruMinyaM'; font-size: 18px;\">" + parts[0] + ". " + parts[1] + "</span></html>");
                     for (int i = 0; i < options.length && i < 4; i++) {
@@ -268,14 +284,14 @@ public class ClientWindow implements ActionListener {
                 }
                 score.setText("SCORE: " + currentScore);
                 JLabel correctLabel = new JLabel("Correct! Your score is now " + currentScore);
-				correctLabel.setFont(boldCustomFont.deriveFont(18f));
-				correctLabel.setForeground(correctAnswerColor);	
-
-				JPanel correctPanel = new JPanel();
-				correctPanel.add(correctLabel);
-
-				JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
-
+                correctLabel.setFont(boldCustomFont.deriveFont(18f));
+                correctLabel.setForeground(correctAnswerColor);	
+    
+                JPanel correctPanel = new JPanel();
+                correctPanel.add(correctLabel);
+    
+                JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+    
                 optionGroup.clearSelection();
     
             }
@@ -289,62 +305,62 @@ public class ClientWindow implements ActionListener {
                 }
                 score.setText("SCORE: " + currentScore);
                 JLabel wrongLabel = new JLabel("Wrong answer! Your score is now " + currentScore);
-				wrongLabel.setFont(boldCustomFont.deriveFont(18f));
-				wrongLabel.setForeground(wrongAnswerColor);	
-
-				JPanel wrongPanel = new JPanel();
-				wrongPanel.add(wrongLabel);
-				
+                wrongLabel.setFont(boldCustomFont.deriveFont(18f));
+                wrongLabel.setForeground(wrongAnswerColor);	
+    
+                JPanel wrongPanel = new JPanel();
+                wrongPanel.add(wrongLabel);
+                
                 JOptionPane.showMessageDialog(window, wrongPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
-
+    
                 optionGroup.clearSelection();
-
+    
             }
             else if (message.startsWith("GAME_OVER")) {
                 stopTimer();
                 String finalMessage = "Game Over!";
                 if (message.contains(":")) {
-					String[] parts = message.split(":");
-					if (parts.length >= 3 && parts[1].equals("WINNER")) {
-						String winnerID = parts[2];
-						String winnerScore = parts.length > 3 ? parts[3] : "0";
-						JPanel gameOverMessage = new JPanel();
-
-						if(winnerID.equals(clientID)) {
-							//finalMessage = "Winner winner, chicken dinner!\n You won the game with a score of " + winnerScore + "!";
-							//JLabel finalMessage = new JLabel("<html><center>Winner winner, chicken dinner!<br>You won the game with a score of \" + winnerScore + \"!</center></html>");
-							finalMessage = "<html><center>Winner winner, chicken dinner!<br>You won the game with a score of " + winnerScore + "!</center></html>";
-							//finalMessage.setFont(boldCustomFont.deriveFont(18f));
-						} else {
-							//finalMessage = "L is for Loser! \n You lost the game with a score of " + currentScore + "!\n The winner is " + winnerID + " with a score of " + winnerScore + "!";
-							finalMessage = "<html><center>L is for Loser!<br>You lost the game with a score of " + currentScore + "<br>The winner is " + winnerID + " with a score of " + winnerScore + "!</center></html>";
-
-						}
-					}
+                    String[] parts = message.split(":");
+                    if (parts.length >= 3 && parts[1].equals("WINNER")) {
+                        String winnerID = parts[2];
+                        String winnerScore = parts.length > 3 ? parts[3] : "0";
+                        JPanel gameOverMessage = new JPanel();
+    
+                        if(winnerID.equals(clientID)) {
+                            //finalMessage = "Winner winner, chicken dinner!\n You won the game with a score of " + winnerScore + "!";
+                            //JLabel finalMessage = new JLabel("<html><center>Winner winner, chicken dinner!<br>You won the game with a score of \" + winnerScore + \"!</center></html>");
+                            finalMessage = "<html><center>Winner winner, chicken dinner!<br>You won the game with a score of " + winnerScore + "!</center></html>";
+                            //finalMessage.setFont(boldCustomFont.deriveFont(18f));
+                        } else {
+                            //finalMessage = "L is for Loser! \n You lost the game with a score of " + currentScore + "!\n The winner is " + winnerID + " with a score of " + winnerScore + "!";
+                            finalMessage = "<html><center>L is for Loser!<br>You lost the game with a score of " + currentScore + "<br>The winner is " + winnerID + " with a score of " + winnerScore + "!</center></html>";
+    
+                        }
+                    }
                 }
                 
-				// JOptionPane.showMessageDialog(window, finalMessage);
-
-				JLabel gameOverLabel = new JLabel(finalMessage);
-				gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
-				gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-				
-				JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
-				
+                // JOptionPane.showMessageDialog(window, finalMessage);
+    
+                JLabel gameOverLabel = new JLabel(finalMessage);
+                gameOverLabel.setFont(boldCustomFont.deriveFont(18f));
+                gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                
+                JOptionPane.showMessageDialog(window, gameOverLabel, "Game Over", JOptionPane.PLAIN_MESSAGE);
+                
                 cleanupResources();
                 window.dispose();
             }
             else if (message.equals("ACK")) {
                 // Handle buzz-in acknowledgment
                 JLabel buzzLabel = new JLabel("You buzzed in first! Select your answer.");
-				buzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
-				buzzLabel.setForeground(Color.BLACK);
-
-				JPanel buzzPanel = new JPanel();
-				buzzPanel.add(buzzLabel);
-
-				JOptionPane.showMessageDialog(window, buzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
-			
+                buzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                buzzLabel.setForeground(Color.BLACK);
+    
+                JPanel buzzPanel = new JPanel();
+                buzzPanel.add(buzzLabel);
+    
+                JOptionPane.showMessageDialog(window, buzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+            
                 for (JRadioButton option : options) {
                     option.setEnabled(true);
                 }
@@ -355,29 +371,29 @@ public class ClientWindow implements ActionListener {
             }
             else if (message.equals("NEGATIVE-ACK")) {
                 // Handle negative acknowledgment
-               ////////// 
-				JLabel otherBuzzLabel = new JLabel("Someone else buzzed in first!");
-				otherBuzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
-				otherBuzzLabel.setForeground(Color.BLACK);
-
-				JPanel otherBuzzPanel = new JPanel();
-				otherBuzzPanel.add(otherBuzzLabel);
-
-				JOptionPane.showMessageDialog(window, otherBuzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
-				/////////// 
+                ////////// 
+                JLabel otherBuzzLabel = new JLabel("Someone else buzzed in first!");
+                otherBuzzLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                otherBuzzLabel.setForeground(Color.BLACK);
+    
+                JPanel otherBuzzPanel = new JPanel();
+                otherBuzzPanel.add(otherBuzzLabel);
+    
+                JOptionPane.showMessageDialog(window, otherBuzzPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+                /////////// 
                 poll.setEnabled(false);
             }
             else if (message.equals("NEXT")) {
                 // Handle next question notification
-
+    
                 JLabel nextQuestionLabel = new JLabel("Moving to next question...");
-				nextQuestionLabel.setFont(boldCustomFont.deriveFont(18f)); 
-				nextQuestionLabel.setForeground(Color.BLACK);
-
-				JPanel nextQuestionPanel = new JPanel();
-				nextQuestionPanel.add(nextQuestionLabel);
-
-				JOptionPane.showMessageDialog(window, nextQuestionPanel, "Next Question", JOptionPane.PLAIN_MESSAGE);
+                nextQuestionLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                nextQuestionLabel.setForeground(Color.BLACK);
+    
+                JPanel nextQuestionPanel = new JPanel();
+                nextQuestionPanel.add(nextQuestionLabel);
+    
+                JOptionPane.showMessageDialog(window, nextQuestionPanel, "Next Question", JOptionPane.PLAIN_MESSAGE);
                 stopTimer();
             }
             else {
@@ -468,6 +484,18 @@ public class ClientWindow implements ActionListener {
                         timesUpPanel.add(timesUpLabel);
         
                         JOptionPane.showMessageDialog(window, timesUpPanel, "Times Up", JOptionPane.PLAIN_MESSAGE);
+                    } else {
+                        // Add this else block to handle when no one buzzed in
+                        out.println("QUESTION_TIMEOUT");  // Inform server question timed out without any buzz
+                        
+                        JLabel noResponseLabel = new JLabel("Time's up! Moving to next question.");
+                        noResponseLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                        noResponseLabel.setForeground(Color.BLACK);
+        
+                        JPanel noResponsePanel = new JPanel();
+                        noResponsePanel.add(noResponseLabel);
+        
+                        JOptionPane.showMessageDialog(window, noResponsePanel, "No Response", JOptionPane.PLAIN_MESSAGE);
                     }
                     
                     poll.setEnabled(true); // Re-enable the poll button after timeout

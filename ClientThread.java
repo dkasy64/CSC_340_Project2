@@ -60,12 +60,18 @@ public class ClientThread implements Runnable {
             out.println("WELCOME:" + clientId);
             System.out.println("Sent welcome message to " + clientId);
             
-            // Wait until the game starts
-        synchronized (activeClients) {
-            while (!TriviaServer.gameStarted) {
-                activeClients.wait();
+            // Wait until the game starts or is killed
+            synchronized (activeClients) {
+                while (!TriviaServer.gameStarted && !TriviaServer.gameKilled) {
+                    activeClients.wait();
+                }
+                
+                // Check if the game was killed while waiting
+                if (TriviaServer.gameKilled) {
+                    return; // Exit the thread if the game was killed
+                }
             }
-        }
+            
             // Send first question
             sendNextQuestion();
             
@@ -73,15 +79,35 @@ public class ClientThread implements Runnable {
             String clientMessage;
             while ((clientMessage = in.readLine()) != null) {
                 System.out.println("Received from " + clientId + ": " + clientMessage);
-                if(gameOver) {
+                if(gameOver || TriviaServer.gameKilled) {
                     break;
-                 }
+                }
                 // Process client messages
                 if (clientMessage.startsWith("ANSWER:")) {
                     handleAnswer(clientMessage);
                 } else if (clientMessage.equals("BUZZ")) {
                     System.out.println(clientId + " buzzed in! (TCP message)");
                     // This is unlikely to happen as buzz should come via UDP
+                } else if (clientMessage.equals("QUESTION_TIMEOUT")) {
+                    // Handle question timeout (no one buzzed in)
+                    System.out.println("Question timed out without any buzz for client " + clientId);
+                    synchronized (activeClients) {
+                        // Move all clients to the next question if this is the first timeout received
+                        boolean alreadyTimedOut = false;
+                        for (ClientThread client : activeClients) {
+                            if (client != this && client.getCurrentQuestionIndex() > this.currentQuestionIndex) {
+                                alreadyTimedOut = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!alreadyTimedOut) {
+                            System.out.println("Moving all clients to next question due to timeout");
+                            for (ClientThread client : activeClients) {
+                                client.sendNextQuestion();
+                            }
+                        }
+                    }
                 }
             }
         } catch (InterruptedException|IOException e) {
@@ -99,8 +125,8 @@ public class ClientThread implements Runnable {
         }
     }
 
-    private void sendNextQuestion() {
-        if(gameOver){
+    public void sendNextQuestion() {
+        if(gameOver || TriviaServer.gameKilled){
             return;
         }
         if (currentQuestionIndex < questions.size()) {
@@ -137,10 +163,6 @@ public class ClientThread implements Runnable {
 
                 System.out.println("Game over. Winner: " + winnerID + " with score: " + winnerScore);
             }
-
-            // out.println("GAME_OVER:Final score: " + clientScores.get(clientId));
-            // System.out.println(clientId + " completed all questions with score: " + 
-            //     clientScores.get(clientId));
         }
     }
 
@@ -152,7 +174,7 @@ public class ClientThread implements Runnable {
     }
 
     private void handleAnswer(String message) {
-        if (gameOver) {
+        if (gameOver || TriviaServer.gameKilled) {
             return;
         }
         if (currentQuestionIndex <= 0 || currentQuestionIndex > questions.size()) {
@@ -193,7 +215,7 @@ public class ClientThread implements Runnable {
         
         printScores(); 
         // Update scores after each answer
-       // Tüm client'ları senkronize et ve sonraki soruya geç
+        // Synchronize all clients and move to the next question
         synchronized (activeClients) {
             for (ClientThread client : activeClients) {
                 client.sendNextQuestion();
