@@ -468,6 +468,18 @@ public class ClientWindow implements ActionListener {
                         timesUpPanel.add(timesUpLabel);
         
                         JOptionPane.showMessageDialog(window, timesUpPanel, "Times Up", JOptionPane.PLAIN_MESSAGE);
+                    } else {
+                        // Add this else block to handle when no one buzzed in
+                        out.println("QUESTION_TIMEOUT");  // Inform server question timed out without any buzz
+                        
+                        JLabel noResponseLabel = new JLabel("Time's up! Moving to next question.");
+                        noResponseLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                        noResponseLabel.setForeground(Color.BLACK);
+        
+                        JPanel noResponsePanel = new JPanel();
+                        noResponsePanel.add(noResponseLabel);
+        
+                        JOptionPane.showMessageDialog(window, noResponsePanel, "No Response", JOptionPane.PLAIN_MESSAGE);
                     }
                     
                     poll.setEnabled(true); // Re-enable the poll button after timeout

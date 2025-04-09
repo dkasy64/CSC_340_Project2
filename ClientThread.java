@@ -61,11 +61,11 @@ public class ClientThread implements Runnable {
             System.out.println("Sent welcome message to " + clientId);
             
             // Wait until the game starts
-        synchronized (activeClients) {
-            while (!TriviaServer.gameStarted) {
-                activeClients.wait();
+            synchronized (activeClients) {
+                while (!TriviaServer.gameStarted) {
+                    activeClients.wait();
+                }
             }
-        }
             // Send first question
             sendNextQuestion();
             
@@ -75,13 +75,33 @@ public class ClientThread implements Runnable {
                 System.out.println("Received from " + clientId + ": " + clientMessage);
                 if(gameOver) {
                     break;
-                 }
+                }
                 // Process client messages
                 if (clientMessage.startsWith("ANSWER:")) {
                     handleAnswer(clientMessage);
                 } else if (clientMessage.equals("BUZZ")) {
                     System.out.println(clientId + " buzzed in! (TCP message)");
                     // This is unlikely to happen as buzz should come via UDP
+                } else if (clientMessage.equals("QUESTION_TIMEOUT")) {
+                    // Handle question timeout (no one buzzed in)
+                    System.out.println("Question timed out without any buzz for client " + clientId);
+                    synchronized (activeClients) {
+                        // Move all clients to the next question if this is the first timeout received
+                        boolean alreadyTimedOut = false;
+                        for (ClientThread client : activeClients) {
+                            if (client != this && client.getCurrentQuestionIndex() > this.currentQuestionIndex) {
+                                alreadyTimedOut = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!alreadyTimedOut) {
+                            System.out.println("Moving all clients to next question due to timeout");
+                            for (ClientThread client : activeClients) {
+                                client.sendNextQuestion();
+                            }
+                        }
+                    }
                 }
             }
         } catch (InterruptedException|IOException e) {
@@ -99,7 +119,7 @@ public class ClientThread implements Runnable {
         }
     }
 
-    private void sendNextQuestion() {
+    public void sendNextQuestion() {
         if(gameOver){
             return;
         }
