@@ -152,6 +152,9 @@ public class ClientThread implements Runnable {
     }
 
     private void handleAnswer(String message) {
+        if (gameOver) {
+            return;
+        }
         if (currentQuestionIndex <= 0 || currentQuestionIndex > questions.size()) {
             out.println("ERROR:Invalid question index");
             return;

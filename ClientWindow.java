@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -31,6 +32,7 @@ public class ClientWindow implements ActionListener {
 	private Color titleColor;
 	private Color correctAnswerColor;
 	private Color wrongAnswerColor;
+    private Color scoreColor;
     
     // Game Logic
     private TimerTask clock;
@@ -53,10 +55,12 @@ public class ClientWindow implements ActionListener {
 		customFont = CustomFont.loadCustomFont("/font/x12y12pxMaruMinyaM.ttf").deriveFont(21f);
 		boldCustomFont = customFont.deriveFont(Font.BOLD);
 		italicCustomFont = customFont.deriveFont(Font.ITALIC);
-		backgroundColor = new Color(221, 251, 248);
+		//backgroundColor = new Color(221, 251, 248);
+        backgroundColor = new Color(255, 248, 211);
 		titleColor = new Color(13, 203, 202);
 		correctAnswerColor = new Color(7, 139, 31);
 		wrongAnswerColor = new Color(225, 0, 0);
+        scoreColor = new Color(135, 20, 180);
         
         JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -69,7 +73,7 @@ public class ClientWindow implements ActionListener {
 
 		//Names are in alphabetical order btw :)
 		JLabel namesLabel = new JLabel("Created by: Dawit Kasy, Tuana Turhan, Natalie Spiska");
-		namesLabel.setFont(italicCustomFont.deriveFont(25f));
+		namesLabel.setFont(italicCustomFont.deriveFont(26f));
 
 		messageLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
 		messageLabel.setForeground(titleColor);
@@ -77,9 +81,9 @@ public class ClientWindow implements ActionListener {
 		namesLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
 
 		panel.add(messageLabel);
-		panel.add(Box.createVerticalStrut(10));
+		panel.add(Box.createVerticalStrut(12));
 		panel.add(testKnowledgeLabel);
-		panel.add(Box.createVerticalStrut(10));
+		panel.add(Box.createVerticalStrut(12));
 		panel.add(namesLabel);
 
 		//All of this is to delete the stupid button
@@ -138,6 +142,7 @@ public class ClientWindow implements ActionListener {
 
         // Question Label
         question = new JLabel("Waiting for question...");
+        question.setFont(boldCustomFont.deriveFont(20f));
         question.setBounds(10, 5, 350, 100);
         window.add(question);
 
@@ -146,7 +151,7 @@ public class ClientWindow implements ActionListener {
         optionGroup = new ButtonGroup();
         for (int i = 0; i < options.length; i++) {
             options[i] = new JRadioButton();
-            options[i].setBounds(10, 110 + (i * 30), 350, 20);
+            options[i].setBounds(22, 110 + (i * 30), 350, 20);
             options[i].addActionListener(this);
             optionGroup.add(options[i]);
             window.add(options[i]);
@@ -155,27 +160,28 @@ public class ClientWindow implements ActionListener {
 
         // Timer
         timer = new JLabel("--");
-        timer.setFont(customFont.deriveFont(12f));
-        timer.setBounds(250, 250, 100, 20);
+        timer.setFont(customFont.deriveFont(16f));
+        timer.setBounds(255, 274, 100, 20);
         window.add(timer);
 
         // Score
         score = new JLabel("SCORE: 0");
-        score.setFont(customFont.deriveFont(12f));
-        score.setBounds(50, 250, 100, 20);
+        score.setFont(customFont.deriveFont(16f));
+        score.setForeground(scoreColor);
+        score.setBounds( 60, 274, 100, 20);
         window.add(score);
 
         // Buttons
         poll = new JButton("Poll (Buzz)");
-        poll.setFont(customFont.deriveFont(12f));
-        poll.setBounds(10, 300, 120, 20);
+        poll.setFont(customFont.deriveFont(16f));
+        poll.setBounds(40, 300, 150, 40);
         poll.addActionListener(this);
         poll.setEnabled(false);  // Disabled until first question arrives
         window.add(poll);
 
         submit = new JButton("Submit");
-        submit.setFont(customFont.deriveFont(12f));
-        submit.setBounds(200, 300, 100, 20);
+        submit.setFont(customFont.deriveFont(16f));
+        submit.setBounds(220, 300, 150, 40);
         submit.addActionListener(this);
         submit.setEnabled(false);  // Disabled initially
         window.add(submit);
@@ -227,15 +233,20 @@ public class ClientWindow implements ActionListener {
                 }
             }
             else if (message.startsWith("QUESTION:")) {
+
                 // Extract and display question with options
                 String questionData = message.substring("QUESTION:".length());
                 String[] parts = questionData.split("\\|");
-                
+
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                ge.registerFont(customFont);
+
                 if (parts.length >= 6) {
-                    question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
-                    question.setFont(customFont.deriveFont(12f));
+
+                    //question.setText("<html>" + parts[0] + ". " + parts[1] + "</html>");
+                    question.setText("<html><span style=\"font-family: 'x12y12pxMaruMinyaM'; font-size: 18px;\">" + parts[0] + ". " + parts[1] + "</span></html>");
                     for (int i = 0; i < options.length && i < 4; i++) {
-                        options[i].setFont(customFont.deriveFont(12f));
+                        options[i].setFont(customFont.deriveFont(16f));
                         options[i].setText(parts[i + 2]);
                         options[i].setEnabled(false); // Disable until buzzed in
                     }
@@ -266,7 +277,7 @@ public class ClientWindow implements ActionListener {
 				JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
 
                 optionGroup.clearSelection();
-                stopTimer();
+    
             }
             else if (message.startsWith("WRONG:")) {
                 // Handle wrong answer
@@ -287,9 +298,10 @@ public class ClientWindow implements ActionListener {
                 JOptionPane.showMessageDialog(window, wrongPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
 
                 optionGroup.clearSelection();
-                stopTimer();
+
             }
             else if (message.startsWith("GAME_OVER")) {
+                stopTimer();
                 String finalMessage = "Game Over!";
                 if (message.contains(":")) {
 					String[] parts = message.split(":");
@@ -357,7 +369,15 @@ public class ClientWindow implements ActionListener {
             }
             else if (message.equals("NEXT")) {
                 // Handle next question notification
-                JOptionPane.showMessageDialog(window, "Moving to next question...");
+
+                JLabel nextQuestionLabel = new JLabel("Moving to next question...");
+				nextQuestionLabel.setFont(boldCustomFont.deriveFont(18f)); 
+				nextQuestionLabel.setForeground(Color.BLACK);
+
+				JPanel nextQuestionPanel = new JPanel();
+				nextQuestionPanel.add(nextQuestionLabel);
+
+				JOptionPane.showMessageDialog(window, nextQuestionPanel, "Next Question", JOptionPane.PLAIN_MESSAGE);
                 stopTimer();
             }
             else {
@@ -439,7 +459,15 @@ public class ClientWindow implements ActionListener {
                     // If time runs out and the client was allowed to answer
                     if (submit.isEnabled()) {
                         out.println("ANSWER:TIMEOUT");  // Inform server about timeout
-                        JOptionPane.showMessageDialog(window, "Time's up! -20 points penalty.");
+
+                        JLabel timesUpLabel = new JLabel("Time's up! -20 points penalty.");
+                        timesUpLabel.setFont(boldCustomFont.deriveFont(18f)); 
+                        timesUpLabel.setForeground(Color.BLACK);
+        
+                        JPanel timesUpPanel = new JPanel();
+                        timesUpPanel.add(timesUpLabel);
+        
+                        JOptionPane.showMessageDialog(window, timesUpPanel, "Times Up", JOptionPane.PLAIN_MESSAGE);
                     }
                     
                     poll.setEnabled(true); // Re-enable the poll button after timeout
