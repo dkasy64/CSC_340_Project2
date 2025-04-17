@@ -33,6 +33,7 @@ public class ClientWindow implements ActionListener {
 	private Color correctAnswerColor;
 	private Color wrongAnswerColor;
     private Color scoreColor;
+    private JLabel feedbackLabel;
     
     // Game Logic
     private TimerTask clock;
@@ -86,7 +87,6 @@ public class ClientWindow implements ActionListener {
 		panel.add(Box.createVerticalStrut(12));
 		panel.add(namesLabel);
 
-		//All of this is to delete the stupid button
 		////////////////////////////////////////////////////////////////////////////////////////
 		//JOptionPane.showMessageDialog(null, panel, "Welcome", JOptionPane.PLAIN_MESSAGE);
 
@@ -186,6 +186,12 @@ public class ClientWindow implements ActionListener {
         submit.setEnabled(false);  // Disabled initially
         window.add(submit);
 
+        feedbackLabel = new JLabel("");
+        feedbackLabel.setFont(customFont.deriveFont(18f));
+        feedbackLabel.setBounds(60, 235, 300, 20);
+        feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        window.add(feedbackLabel);
+
         window.setVisible(true);
     }
 
@@ -283,14 +289,18 @@ public class ClientWindow implements ActionListener {
                     currentScore += 10;
                 }
                 score.setText("SCORE: " + currentScore);
-                JLabel correctLabel = new JLabel("Correct! Your score is now " + currentScore);
-                correctLabel.setFont(boldCustomFont.deriveFont(18f));
-                correctLabel.setForeground(correctAnswerColor);	
+
+                feedbackLabel.setText("Correct! +10 points!");
+                feedbackLabel.setForeground(correctAnswerColor);
+
+                // JLabel correctLabel = new JLabel("Correct! Your score is now " + currentScore);
+                // correctLabel.setFont(boldCustomFont.deriveFont(18f));
+                // correctLabel.setForeground(correctAnswerColor);	
     
-                JPanel correctPanel = new JPanel();
-                correctPanel.add(correctLabel);
+                // JPanel correctPanel = new JPanel();
+                // correctPanel.add(correctLabel);
     
-                JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+                // JOptionPane.showMessageDialog(window, correctPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
     
                 optionGroup.clearSelection();
     
@@ -304,14 +314,18 @@ public class ClientWindow implements ActionListener {
                     currentScore = Math.max(0, currentScore - 10); // Prevent negative score
                 }
                 score.setText("SCORE: " + currentScore);
-                JLabel wrongLabel = new JLabel("Wrong answer! Your score is now " + currentScore);
-                wrongLabel.setFont(boldCustomFont.deriveFont(18f));
-                wrongLabel.setForeground(wrongAnswerColor);	
+
+                feedbackLabel.setText("Wrong! -10 points!");
+                feedbackLabel.setForeground(wrongAnswerColor);
+
+                // JLabel wrongLabel = new JLabel("Wrong answer! Your score is now " + currentScore);
+                // wrongLabel.setFont(boldCustomFont.deriveFont(18f));
+                // wrongLabel.setForeground(wrongAnswerColor);	
     
-                JPanel wrongPanel = new JPanel();
-                wrongPanel.add(wrongLabel);
+                // JPanel wrongPanel = new JPanel();
+                // wrongPanel.add(wrongLabel);
                 
-                JOptionPane.showMessageDialog(window, wrongPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
+                // JOptionPane.showMessageDialog(window, wrongPanel, "Buzzed In", JOptionPane.PLAIN_MESSAGE);
     
                 optionGroup.clearSelection();
     

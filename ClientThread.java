@@ -25,30 +25,30 @@ public class ClientThread implements Runnable {
         this.questions = questions;
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        
+       
         // Generate client ID and add to scores map
         this.clientId = "Client-" + (activeClients.size() + 1);
         clientScores.put(clientId, 0);
         System.out.println(clientId + " connected from: " + socket.getInetAddress());
         printScores(); // Show current scores
     }
-    
+   
     public String getClientId() {
         return clientId;
     }
-    
+   
     public PrintWriter getWriter() {
         return out;
     }
-    
+   
     public int getCurrentQuestionIndex() {
         return currentQuestionIndex;
     }
-    
+   
     public void setBuzzedInFirst(boolean status) {
         this.buzzedInFirst = status;
     }
-    
+   
     public boolean hasBuzzedInFirst() {
         return buzzedInFirst;
     }
@@ -59,22 +59,22 @@ public class ClientThread implements Runnable {
             // Send welcome message with client ID
             out.println("WELCOME:" + clientId);
             System.out.println("Sent welcome message to " + clientId);
-            
+           
             // Wait until the game starts or is killed
             synchronized (activeClients) {
                 while (!TriviaServer.gameStarted && !TriviaServer.gameKilled) {
                     activeClients.wait();
                 }
-                
+               
                 // Check if the game was killed while waiting
                 if (TriviaServer.gameKilled) {
                     return; // Exit the thread if the game was killed
                 }
             }
-            
+           
             // Send first question
             sendNextQuestion();
-            
+           
             // Main game loop
             String clientMessage;
             while ((clientMessage = in.readLine()) != null) {
@@ -100,7 +100,7 @@ public class ClientThread implements Runnable {
                                 break;
                             }
                         }
-                        
+                       
                         if (!alreadyTimedOut) {
                             System.out.println("Moving all clients to next question due to timeout");
                             for (ClientThread client : activeClients) {
@@ -168,7 +168,7 @@ public class ClientThread implements Runnable {
 
     public static void printScores() {
         System.out.println("\nCurrent Scores:");
-        clientScores.forEach((client, score) -> 
+        clientScores.forEach((client, score) ->
             System.out.println(client + ": " + score));
         System.out.println();
     }
@@ -181,7 +181,7 @@ public class ClientThread implements Runnable {
             out.println("ERROR:Invalid question index");
             return;
         }
-        
+       
         // Extract answer
         String answer;
         if (message.equals("ANSWER:TIMEOUT")) {
@@ -194,14 +194,14 @@ public class ClientThread implements Runnable {
         } else {
             answer = message.substring("ANSWER:".length());
         }
-        
+       
         // Get correct answer from the question (format: Q#|Question|Option1|Option2|Option3|Option4|CorrectAnswer)
         String[] questionParts = questions.get(currentQuestionIndex - 1).split("\\|");
         String correctAnswer = questionParts[6];  // The 7th part is the correct answer (index 6)
-        
+       
         System.out.println(clientId + " answered: " + answer);
         System.out.println("Correct answer was: " + correctAnswer);
-        
+       
         // Check if answer is correct
         if (answer.trim().equals(correctAnswer.trim())) {
             clientScores.put(clientId, clientScores.get(clientId) + 10);
@@ -212,8 +212,8 @@ public class ClientThread implements Runnable {
             out.println("WRONG:Your score is now " + clientScores.get(clientId));
             System.out.println(clientId + " answered incorrectly (-10 points)");
         }
-        
-        printScores(); 
+       
+        printScores();
         // Update scores after each answer
         // Synchronize all clients and move to the next question
         synchronized (activeClients) {
